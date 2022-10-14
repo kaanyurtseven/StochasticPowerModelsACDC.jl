@@ -1,0 +1,4 @@
+name = "StochasticPowerModelsACDC"
+uuid = "3f1d3684-8558-4d00-8a65-0c8e8d1c8295"
+authors = ["kaanyurtseven <eng.kaanyurtseven@gmail.com>"]
+version = "0.1.0"
