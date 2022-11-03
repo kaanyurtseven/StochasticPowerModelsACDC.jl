@@ -60,6 +60,7 @@ module StochasticPowerModelsACDC
     include("form/iv.jl")
 
     include("prob/sopf_iv.jl")
+    include("prob/sopf_acdc_iv.jl")
 
     include("util/data.jl")
     include("util/util.jl")
