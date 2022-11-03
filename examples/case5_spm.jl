@@ -19,21 +19,19 @@ ipopt_solver = Ipopt.Optimizer
 
 # input
 deg  = 2
-case_sopf = "case5_spm.m"
-case = "case5_spm_acdc_spm.m"
+
+case = "case5_SPMACDC_spm.m"
 
 
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
-file_sopf  = joinpath(BASE_DIR, "test/data/matpower", case_sopf)
 
-result_ivr = solve_sopf_iv(file_sopf, _PM.IVRPowerModel, ipopt_solver, deg=deg);
+result_ivr = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
 result_ivracdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
 
-_SPMACDC.print_summary(result_ivr["solution"])
-_SPMACDC.print_summary(result_ivracdc["solution"])
-
+#_SPMACDC.print_summary(result_ivr["solution"])
+#_SPMACDC.print_summary(result_ivracdc["solution"])
 
 
 println("\n\n>>> SPM Results >>>")
