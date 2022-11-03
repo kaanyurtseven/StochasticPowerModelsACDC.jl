@@ -1,3 +1,8 @@
+using Pkg
+
+Pkg.activate(".")
+
+
 using JuMP
 using Ipopt
 using PowerModels
@@ -5,8 +10,8 @@ using StochasticPowerModelsACDC
 using PowerModelsACDC
 
 # constants 
-const PM = PowerModels
-const SPM = StochasticPowerModelsACDC
+const _PM = PowerModels
+const _SPMACDC = StochasticPowerModelsACDC
 const _PMACDC = PowerModelsACDC
 
 # solvers
@@ -16,19 +21,41 @@ ipopt_solver = Ipopt.Optimizer
 deg  = 2
 case_sopf = "case5_spm.m"
 case = "case5_spm_acdc_spm.m"
-#case = "case67acdc_scopf.m"
-# data
+
+
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
 file_sopf  = joinpath(BASE_DIR, "test/data/matpower", case_sopf)
 
-#-----------------------------------
-# run the convenience functions for stochastic OPF for IVR and ACR
-result_ivr = solve_sopf_iv(file_sopf, PM.IVRPowerModel, ipopt_solver, deg=deg)
-#result_acr = solve_sopf_acr(file, PM.ACRPowerModel, ipopt_solver, deg=deg)
+result_ivr = solve_sopf_iv(file_sopf, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
-result_ivracdc = solve_sopf_acdc_iv(file, PM.IVRPowerModel, ipopt_solver, deg=deg)
+result_ivracdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
-SPM.print_summary(result_ivracdc["solution"])
+
+_SPMACDC.print_summary(result_ivr["solution"])
+_SPMACDC.print_summary(result_ivracdc["solution"])
+
+
+
+println("\n\n>>> SPM Results >>>")
+println(result_ivr["primal_status"])
+print("Objective: ")
+print(result_ivr["objective"])
+
+println("\n\n>>> SPMACDC Results >>>")
+println(result_ivracdc["primal_status"])
+print("Objective: ")
+print(result_ivracdc["objective"])
+
+
+
+
+
+
+
+
+
+#=
+
 
 @assert result_ivr["termination_status"] == PM.LOCALLY_SOLVED
 #@assert result_acr["termination_status"] == PM.LOCALLY_SOLVED
@@ -73,3 +100,8 @@ result_ivr3 = PM.solve_model(sdata, PM.IVRPowerModel, ipopt_solver, SPM.build_so
 obj_ivr3 = result_ivr3["objective"]
 
 @assert obj_ivr ≈ obj_ivr2 ≈ obj_ivr3
+
+
+
+
+=#

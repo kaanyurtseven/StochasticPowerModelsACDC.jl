@@ -216,7 +216,7 @@ end
 
 
 
-function constraint_gp_converter_losses(pm::_PM.AbstractIVRModel, nw, i, T2, T3, a, b, c, plmax)
+function constraint_gp_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i, T2, T3, a, b, c, plmax)
     iconv_lin  = Dict(nw => _PM.var(pm, nw, :iconv_lin, i) for nw in _PM.nw_ids(pm))
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
