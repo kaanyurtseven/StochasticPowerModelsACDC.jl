@@ -26,7 +26,7 @@ module StochasticPowerModelsACDC
     const _IM = InfrastructureModels
     const _KDE = KernelDensity
     const _PCE = PolyChaos
-    const _PM = PowerModelsS
+    const _PM = PowerModels
     const _SPMACDC = StochasticPowerModelsACDC
     const _PMACDC = PowerModelsACDC
 
@@ -69,6 +69,7 @@ module StochasticPowerModelsACDC
     export BASE_DIR
 
     export solve_sopf_iv
+    export solve_sopf_acdc_iv
 
     export build_stochastic_data
     export extend_matlab_file

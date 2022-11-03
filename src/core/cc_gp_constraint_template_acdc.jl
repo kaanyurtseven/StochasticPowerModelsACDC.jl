@@ -137,7 +137,7 @@ end
 
 
 function constraint_gp_converter_limits(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
-
+    conv = _PM.ref(pm, nw, :convdc, i)
     T2  = pm.data["T2"]
     T3  = pm.data["T3"]
 

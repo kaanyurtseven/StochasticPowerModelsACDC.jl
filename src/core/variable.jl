@@ -8,7 +8,7 @@
 
 # bus
 ""
-function variable_bus_voltage(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_bus_voltage(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
     _PM.variable_bus_voltage_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PM.variable_bus_voltage_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
@@ -17,41 +17,41 @@ function variable_bus_voltage(pm::AbstractACRModel; nw::Int=nw_id_default, bound
 end
 
 ""
-function variable_dcgrid_voltage_magnitude(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_dcgrid_voltage_magnitude(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
     
     _PMACDC.variable_dcgrid_voltage_magnitude(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
 end
 
-function variable_active_dcbranch_flow(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_active_dcbranch_flow(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
 
     #DC grid variables
-    _PMACDC.variable_active_dcbranch_flow(pm, nw=n, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_active_dcbranch_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
 end
 
-function variable_dcbranch_current(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_dcbranch_current(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
 
-    _PMACDC.variable_dcbranch_current(pm, nw=n, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_dcbranch_current(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
 end
 
-function variable_dc_converter(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_dc_converter(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
             
-    _PMACDC.variable_conv_tranformer_flow(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_conv_reactor_flow(pm, nw=n, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_conv_tranformer_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_conv_reactor_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
-    _PMACDC.variable_converter_active_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_reactive_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_acside_current(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_dcside_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC. variable_converter_firing_angle(pm, nw=n, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_active_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_reactive_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_acside_current(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_dcside_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC. variable_converter_firing_angle(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
-    _PMACDC.variable_converter_filter_voltage(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_internal_voltage(pm, nw=n, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_filter_voltage(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_internal_voltage(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
-    _PMACDC.variable_converter_to_grid_active_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_to_grid_reactive_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_to_grid_active_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_to_grid_reactive_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
 end
 
@@ -115,7 +115,7 @@ end
 
 # generator
 ""
-function variable_gen_power(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+function variable_gen_power(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
     _PM.variable_gen_power_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PM.variable_gen_power_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end

@@ -1,32 +1,32 @@
-function variable_dc_converter(pm::_PM.AbstractIVRModel; kwargs...)
-    _PMACDC.variable_filter_voltage_real(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_filter_voltage_imaginary(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_voltage_real(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_voltage_imaginary(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_transformer_current_real_from(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_transformer_current_real_to(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_transformer_current_imaginary_from(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_transformer_current_imaginary_to(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_reactor_current_real_from(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_reactor_current_real_to(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_reactor_current_imaginary_from(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_reactor_current_imaginary_to(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_current_real(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_current_imaginary(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC. variable_converter_current_dc(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_current_lin(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_active_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_reactive_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_dcside_power(pm, nw=n, bounded=bounded, report=report; kwargs...)
+function variable_dc_converter(pm::_PM.AbstractIVRModel; nw::Int=nw_id_default, bounded::Bool=true,report::Bool=false, kwargs...)
+    _PMACDC.variable_filter_voltage_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_filter_voltage_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_voltage_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_voltage_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_transformer_current_real_from(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_transformer_current_real_to(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_transformer_current_imaginary_from(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_transformer_current_imaginary_to(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_reactor_current_real_from(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_reactor_current_real_to(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_reactor_current_imaginary_from(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_reactor_current_imaginary_to(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC. variable_converter_current_dc(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_current_lin(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_active_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_converter_reactive_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    _PMACDC.variable_dcside_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 
 
-    variable_filter_voltage_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)                # v ct gp cc
-    variable_converter_voltage_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)             # v ct gp cc
-    variable_transformer_current_from_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)      # v ct gp cc
-    variable_transformer_current_to_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)        # v ct gp cc
-    variable_reactor_current_from_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)          # v ct gp cc
-    variable_reactor_current_to_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)            # v ct gp cc
-    variable_converter_current_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)             # v ct gp cc
+    variable_filter_voltage_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)                # v ct gp cc
+    variable_converter_voltage_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)             # v ct gp cc
+    variable_transformer_current_from_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)      # v ct gp cc
+    variable_transformer_current_to_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)        # v ct gp cc
+    variable_reactor_current_from_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)          # v ct gp cc
+    variable_reactor_current_to_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)            # v ct gp cc
+    variable_converter_current_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)             # v ct gp cc
    # variable_converter_current_dc_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)          # v
     #variable_converter_current_lin_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)         # v
     

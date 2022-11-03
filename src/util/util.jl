@@ -73,9 +73,9 @@ end
 function build_stochastic_acdc_data(data::Dict{String,Any}, deg::Int)
     # add maximum current
 
-    _PMACDC.to_pu!(data)
-    _PMACDC.fix_data!(data)
-    _PMACDC.convert_matpowerdcline_to_branchdc!(data)
+    #to_pu!(data)
+    #fix_data!(data)
+    #convert_matpowerdcline_to_branchdc!(data)
 
 
     for (nb, branch) in data["branch"]
@@ -164,3 +164,5 @@ function print_summary(obj::Dict{String,<:Any}; kwargs...)
         end
     end
 end
+
+

@@ -11,8 +11,9 @@
 ""
 function solve_sopf_acdc_iv(file::String, model_constructor, optimizer; deg::Int=1, solution_processors=[sol_data_model!], kwargs...)
     data = _PM.parse_file(file)
+    process_additional_data!(data)
     
-    return solve_sopf_acdc_iv(data, model_constructor, optimizer; deg=deg, solution_processors=solution_processors, kwargs...)
+    return solve_sopf_acdc_iv(data, model_constructor, optimizer; deg=deg,ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
 end
 
 ""
@@ -21,7 +22,7 @@ function solve_sopf_acdc_iv(data::Dict, model_constructor, optimizer; deg::Int=1
     @assert model_constructor <: _PM.AbstractIVRModel "This problem type only supports the IVRModel"
     
     sdata = build_stochastic_acdc_data(data, deg)
-    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sopf_acdc_iv; multinetwork=true, solution_processors=solution_processors, kwargs...)
+    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sopf_acdc_iv; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
     result["mop"] = sdata["mop"]
     
     return result
@@ -34,18 +35,18 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
     for (n, network) in _PM.nws(pm) 
         variable_bus_voltage(pm, nw=n)
 
-        variable_branch_current(pm, nw=n)
+        variable_branch_current(pm, nw=n, bounded=false)
 
         variable_gen_power(pm, nw=n, bounded=false)                             # enforcing bounds alters the objective 
         variable_gen_current(pm, nw=n, bounded=false)                           # enforcing bounds makes problem infeasible
-        variable_load_current(pm, nw=n)
+        variable_load_current(pm, nw=n, bounded=false)
 
         #DC grid variables
-        variable_active_dcbranch_flow(pm, nw=n)
-        variable_dcbranch_current(pm, nw=n)
-        variable_dcgrid_voltage_magnitude(pm, nw=n)
+        variable_active_dcbranch_flow(pm, nw=n, bounded=false)
+        variable_dcbranch_current(pm, nw=n, bounded=false)
+        variable_dcgrid_voltage_magnitude(pm, nw=n, bounded=false)
         #DC converter variables
-        variable_dc_converter(pm, nw=n)
+        variable_dc_converter(pm, nw=n, bounded=false)
 
     end
 
