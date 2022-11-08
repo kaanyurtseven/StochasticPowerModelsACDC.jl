@@ -5,6 +5,8 @@ function extend_matlab_file(path::String)
     # data
     data = _PM.parse_file(path)
 
+    λ_val = 1.65;
+
     # general data
     baseMVA = data["baseMVA"]
 
@@ -14,16 +16,43 @@ function extend_matlab_file(path::String)
     for (l,load) in data["load"]
         bus = load["load_bus"]
         μ[bus] = load["pd"] * baseMVA
-        σ[bus] = load["pd"] * baseMVA * 0.10
+        σ[bus] = abs(load["pd"] * baseMVA * 0.10)
+        #σ[bus] = 0
     end
+    #=
     for (b,bus) in data["bus"]
-        bus["dst_id"]   = 0
+
+        if parse(Int,b) == 2 || parse(Int,b) == 5 || parse(Int,b) == 67
+            
+            bus["dst_id"]   = 1
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = 1.03643
+            bus["λvmax"]    = 1.03643
+        else
+            bus["dst_id"]   = 0
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = 1.03643
+            bus["λvmax"]    = 1.03643
+        end
+
+    end
+    =#
+    
+    for (b,bus) in data["bus"]
+
+        bus["dst_id"]   = 2
         bus["μ"]        = μ[parse(Int,b)]
         bus["σ"]        = σ[parse(Int,b)]
-        bus["λvmin"]    = 1.03643
-        bus["λvmax"]    = 1.03643
-    end
+        bus["λvmin"]    = λ_val
+        bus["λvmax"]    = λ_val
 
+
+    end
+    
+
+#=
     # dcbus data 
     Nb   = length(data["busdc"])
     for (b,busdc) in data["busdc"]
@@ -33,7 +62,15 @@ function extend_matlab_file(path::String)
         busdc["λvmin"]    = 1.03643
         busdc["λvmax"]    = 1.03643
     end
+=#
 
+    # dcbus data 
+    for (b,busdc) in data["busdc"]
+        busdc["λvmin"]    = λ_val
+        busdc["λvmax"]    = λ_val
+    end
+
+#=
     # convdc data 
     Nb   = length(data["convdc"])
     for (b,convdc) in data["convdc"]
@@ -43,27 +80,35 @@ function extend_matlab_file(path::String)
         convdc["λvmin"]    = 1.03643
         convdc["λvmax"]    = 1.03643
     end
+=#
+
+    # convdc data 
+    for (b,convdc) in data["convdc"]
+        convdc["λvmin"]    = λ_val
+        convdc["λvmax"]    = λ_val
+    end
+
 
     # generator data
     for (g,gen) in data["gen"]
-        gen["λpmin"] = 1.03643
-        gen["λpmax"] = 1.03643
-        gen["λqmin"] = 1.03643
-        gen["λqmax"] = 1.03643
+        gen["λpmin"] = λ_val
+        gen["λpmax"] = λ_val
+        gen["λqmin"] = λ_val
+        gen["λqmax"] = λ_val
     end
 
     # branch data
     for (l,branch) in data["branch"]
-        branch["λcmax"] = 1.03643
+        branch["λcmax"] = λ_val
     end
 
     # dc branch data
     for (l,branchdc) in data["branchdc"]
-        branchdc["λcmax"] = 1.03643
+        branchdc["λcmax"] = λ_val
     end
 
     # export file
-    _PM.export_file(path[1:end-2] * "_spm.m", data)
+    _PM.export_file(path[1:end-2] * "_SPMACDC.m", data)
 end
 
 

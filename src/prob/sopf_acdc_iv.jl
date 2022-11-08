@@ -35,18 +35,18 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
     for (n, network) in _PM.nws(pm) 
         variable_bus_voltage(pm, nw=n)
 
-        variable_branch_current(pm, nw=n, bounded=false)
+        variable_branch_current(pm, nw=n)
 
         variable_gen_power(pm, nw=n, bounded=false)                             # enforcing bounds alters the objective 
         variable_gen_current(pm, nw=n, bounded=false)                           # enforcing bounds makes problem infeasible
-        variable_load_current(pm, nw=n, bounded=false)
+        variable_load_current(pm, nw=n)
 
         #DC grid variables
-        variable_active_dcbranch_flow(pm, nw=n, bounded=false)
-        variable_dcbranch_current(pm, nw=n, bounded=false)
-        variable_dcgrid_voltage_magnitude(pm, nw=n, bounded=false)
+        variable_active_dcbranch_flow(pm, nw=n)
+        variable_dcbranch_current(pm, nw=n)
+        variable_dcgrid_voltage_magnitude(pm, nw=n)
         #DC converter variables
-        variable_dc_converter(pm, nw=n, bounded=false)
+        variable_dc_converter(pm, nw=n)
 
     end
 
@@ -56,7 +56,8 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, :bus, nw=n)
-            constraint_current_balance_ac(pm, i, nw=n)
+            #constraint_current_balance_ac(pm, i, nw=n)
+            constraint_current_balance(pm, i, nw=n)########################################################
             constraint_gp_bus_voltage_magnitude_squared(pm, i, nw=n)
         end
 
@@ -81,7 +82,8 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, :branchdc, nw=n)
-            constraint_gp_ohms_dc_branch(pm, i, nw=n)
+            constraint_gp_ohms_dc_branch(pm, i, nw=n) #######################################################
+            constraint_ohms_dc_branch(pm, i, nw=n)
         end
 
         for i in _PM.ids(pm, :convdc, nw=n)
@@ -114,7 +116,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
     end
 
     for g in _PM.ids(pm, :gen, nw=1)
-        constraint_cc_gen_power(pm, g, nw=1)
+        #constraint_cc_gen_power(pm, g, nw=1)
     end
 
     for i in _PM.ids(pm, :convdc, nw=1)

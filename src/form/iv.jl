@@ -175,12 +175,13 @@ function constraint_current_balance(pm::AbstractIVRModel, n::Int, i, bus_arcs, b
                                 )
 end
 
-function constraint_current_balance_ac(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs)    vr = _PM.var(pm, n, :vr, i)
+function constraint_current_balance_ac(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs)
+    vr = _PM.var(pm, n, :vr, i)
     vi = _PM.var(pm, n, :vi, i)
 
     cr = _PM.var(pm, n, :cr)
     ci = _PM.var(pm, n, :ci)
-    #cidc = _PM.var(pm, n, :cidc)
+    cidc = _PM.var(pm, n, :cidc)
 
     iik_r = _PM.var(pm, n, :iik_r)
     iik_i = _PM.var(pm, n, :iik_i)
@@ -196,22 +197,23 @@ function constraint_current_balance_ac(pm::AbstractIVRModel, n::Int, i, bus_arcs
                                 - sum(crd[d] for d in bus_loads)
                                 - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
                                 )
-    #=
-                                JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
+    
+    JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
                                 + sum(cidc[d] for d in bus_arcs_dc)
                                 ==
                                 sum(cig[g] for g in bus_gens)
                                 - sum(cid[d] for d in bus_loads)
                                 - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
                                 )
-                                =#
-
+                                
+#=
     JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
                                 ==
                                 sum(cig[g] for g in bus_gens)
                                 - sum(cid[d] for d in bus_loads)
                                 - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
                                 )
+=#
 end
 
 

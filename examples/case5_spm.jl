@@ -15,34 +15,62 @@ const _SPMACDC = StochasticPowerModelsACDC
 const _PMACDC = PowerModelsACDC
 
 # solvers
-ipopt_solver = Ipopt.Optimizer
+##ipopt_solver = Ipopt.Optimizer
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3500)
 
 # input
 deg  = 2
 
-case = "case5_SPMACDC_spm.m"
+#case = "case5_acdc_SPMACDC_det.m"
+
+case = "case5_acdc_SPMACDC.m"
+
+#case = "case39_acdc_SPMACDC_det.m"
+
+#case = "case67acdc_scopf_SPMACDC_det.m"
+
+#case = "case67_acdc_40pen_SPMACDC.m"
 
 
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
 
-result_ivr = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
-result_ivracdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
+result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
+
+result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
+
+s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
+result_acdc = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt_solver; setting = s)
+
+result_spmacdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
 
-#_SPMACDC.print_summary(result_ivr["solution"])
-#_SPMACDC.print_summary(result_ivracdc["solution"])
+#_SPMACDC.print_summary(result_spm["solution"])
+#_SPMACDC.print_summary(result_spmacdc["solution"])
+
+
+println("\n\n>>> OPF Results >>>")
+println(result_opf["primal_status"])
+print("Objective: ")
+print(result_opf["objective"])
 
 
 println("\n\n>>> SPM Results >>>")
-println(result_ivr["primal_status"])
+println(result_spm["primal_status"])
 print("Objective: ")
-print(result_ivr["objective"])
+print(result_spm["objective"])
+
+
+println("\n\n>>> ACDC Results >>>")
+println(result_acdc["primal_status"])
+print("Objective: ")
+print(result_acdc["objective"])
+
 
 println("\n\n>>> SPMACDC Results >>>")
-println(result_ivracdc["primal_status"])
+println(result_spmacdc["primal_status"])
 print("Objective: ")
-print(result_ivracdc["objective"])
+print(result_spmacdc["objective"])
 
 
 

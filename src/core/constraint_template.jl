@@ -109,6 +109,20 @@ function constraint_gp_ohms_dc_branch(pm::AbstractPowerModel, b::Int; nw::Int=nw
     constraint_gp_ohms_dc_branch(pm, nw, b, T2, T3, f_bus, t_bus, f_idx, t_idx, branch["r"], p)
 end
 
+function constraint_ohms_dc_branch(pm::AbstractPowerModel, b::Int; nw::Int=nw_id_default)
+
+    branch = _PM.ref(pm, nw, :branchdc, b)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    f_idx = (b, f_bus, t_bus)
+    t_idx = (b, t_bus, f_bus)
+
+    p = _PM.ref(pm, nw, :dcpol)
+
+    constraint_ohms_dc_branch(pm, nw, b, f_bus, t_bus, f_idx, t_idx, branch["r"], p)
+end
+
+#=
 function constraint_gp_converter_limits(pm::AbstractPowerModel, b::Int; nw::Int=nw_id_default)
     T2  = pm.data["T2"]
     T3  = pm.data["T3"]
@@ -126,6 +140,7 @@ function constraint_gp_converter_limits(pm::AbstractPowerModel, b::Int; nw::Int=
 
     constraint_gp_converter_limits(pm, nw, b, T2, T3, imax, vmax, vmin, b_idx, pdcmin, pdcmax)
 end
+=#
 
 ""
 function constraint_gp_power_branch_to(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
@@ -210,18 +225,6 @@ function constraint_cc_bus_voltage_magnitude_squared(pm::AbstractPowerModel, i::
     constraint_cc_bus_voltage_magnitude_squared(pm, i, vmin, vmax, λmin, λmax, T2, mop)
 end
 
-function constraint_cc_filter_voltage_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    vmin = _PM.ref(pm, nw, :bus, i, "vmin")
-    vmax = _PM.ref(pm, nw, :bus, i, "vmax")
-    
-    λmin = _PM.ref(pm, nw, :bus, i, "λvmin")
-    λmax = _PM.ref(pm, nw, :bus, i, "λvmax")
-    
-    T2  = pm.data["T2"]
-    mop = pm.data["mop"]
-
-    constraint_cc_bus_voltage_magnitude_squared(pm, i, vmin, vmax, λmin, λmax, T2, mop)
-end
 
 ## branch
 ""

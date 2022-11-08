@@ -47,19 +47,13 @@ function constraint_gp_converter_current_squared(pm::AbstractPowerModel, i::Int;
     constraint_gp_converter_current_squared(pm, nw, i, T2, T3)
 end
 
-function constraint_gp_converter_limits(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    T2  = pm.data["T2"]
-    T3  = pm.data["T3"]
-
-    constraint_gp_converter_limits(pm, nw, i, T2, T3)
-end
 
 function constraint_cc_filter_voltage_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    vmin = _PM.ref(pm, nw, :bus, i, "vmin")
-    vmax = _PM.ref(pm, nw, :bus, i, "vmax")
+    vmin = _PM.ref(pm, nw, :convdc, i, "Vmmin")
+    vmax = _PM.ref(pm, nw, :convdc, i, "Vmmax")
     
-    λmin = _PM.ref(pm, nw, :bus, i, "λvmin")
-    λmax = _PM.ref(pm, nw, :bus, i, "λvmax")
+    λmin = _PM.ref(pm, nw, :convdc, i, "λvmin")
+    λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
     T2  = pm.data["T2"]
     mop = pm.data["mop"]
@@ -68,11 +62,11 @@ function constraint_cc_filter_voltage_squared(pm::AbstractPowerModel, i::Int; nw
 end
 
 function constraint_cc_converter_voltage_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    vmin = _PM.ref(pm, nw, :bus, i, "vmin")
-    vmax = _PM.ref(pm, nw, :bus, i, "vmax")
+    vmin = _PM.ref(pm, nw, :convdc, i, "Vmmin")
+    vmax = _PM.ref(pm, nw, :convdc, i, "Vmmax")
     
-    λmin = _PM.ref(pm, nw, :bus, i, "λvmin")
-    λmax = _PM.ref(pm, nw, :bus, i, "λvmax")
+    λmin = _PM.ref(pm, nw, :convdc, i, "λvmin")
+    λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
     T2  = pm.data["T2"]
     mop = pm.data["mop"]
@@ -81,7 +75,10 @@ function constraint_cc_converter_voltage_squared(pm::AbstractPowerModel, i::Int;
 end
 
 function constraint_cc_transformer_current_from_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    Imax = _PM.ref(pm, nw, :convdc, i, "Imax")
+    vpu = 1;
+    conv = _PM.ref(pm, nw, :convdc, i)
+    
+    Imax = conv["Pacrated"]/vpu
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
@@ -92,7 +89,10 @@ function constraint_cc_transformer_current_from_squared(pm::AbstractPowerModel, 
 end
 
 function constraint_cc_transformer_current_to_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    Imax = _PM.ref(pm, nw, :convdc, i, "Imax")
+    vpu = 1;
+    conv = _PM.ref(pm, nw, :convdc, i)
+    
+    Imax = conv["Pacrated"]/vpu
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
@@ -103,7 +103,10 @@ function constraint_cc_transformer_current_to_squared(pm::AbstractPowerModel, i:
 end
 
 function constraint_cc_reactor_current_from_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    Imax = _PM.ref(pm, nw, :convdc, i, "Imax")
+    vpu = 1;
+    conv = _PM.ref(pm, nw, :convdc, i)
+    
+    Imax = conv["Pacrated"]/vpu
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
@@ -114,7 +117,10 @@ function constraint_cc_reactor_current_from_squared(pm::AbstractPowerModel, i::I
 end
 
 function constraint_cc_reactor_current_to_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    Imax = _PM.ref(pm, nw, :convdc, i, "Imax")
+    vpu = 1;
+    conv = _PM.ref(pm, nw, :convdc, i)
+    
+    Imax = conv["Pacrated"]/vpu
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
@@ -125,7 +131,10 @@ function constraint_cc_reactor_current_to_squared(pm::AbstractPowerModel, i::Int
 end
 
 function constraint_cc_converter_current_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
-    Imax = _PM.ref(pm, nw, :convdc, i, "Imax")
+    vpu = 1;
+    conv = _PM.ref(pm, nw, :convdc, i)
+    
+    Imax = conv["Pacrated"]/vpu
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
