@@ -5,6 +5,7 @@
 			"path": "../.."
 		},
 		{
+			"name": "PowerModelsACDC.jl-master",
 			"path": "../../../PowerModelsACDC.jl-master"
 		}
 	],

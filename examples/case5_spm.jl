@@ -21,9 +21,9 @@ ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5,
 # input
 deg  = 2
 
-#case = "case5_acdc_SPMACDC_det.m"
+case = "case5_acdc_SPMACDC_det.m"
 
-case = "case5_acdc_SPMACDC.m"
+#case = "case5_acdc_SPMACDC.m"
 
 #case = "case39_acdc_SPMACDC_det.m"
 
