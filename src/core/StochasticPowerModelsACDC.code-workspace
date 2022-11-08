@@ -1,7 +1,12 @@
 {
 	"folders": [
 		{
+			"name": "StochasticPowerModelsACDC",
 			"path": "../.."
+		},
+		{
+			"path": "../../../PowerModelsACDC.jl-master"
 		}
-	]
+	],
+	"settings": {}
 }
