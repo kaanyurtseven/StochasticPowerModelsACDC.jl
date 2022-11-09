@@ -225,6 +225,22 @@ function constraint_cc_bus_voltage_magnitude_squared(pm::AbstractPowerModel, i::
     constraint_cc_bus_voltage_magnitude_squared(pm, i, vmin, vmax, λmin, λmax, T2, mop)
 end
 
+function constraint_cc_conv_voltage_magnitude(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
+ 
+    vmin = _PM.ref(pm, nw, :busdc, i, "Vdcmin")
+    vmax = _PM.ref(pm, nw, :busdc, i, "Vdcmax")
+    
+    λmin = _PM.ref(pm, nw, :busdc, i, "λvmin")
+    λmax = _PM.ref(pm, nw, :busdc, i, "λvmax")
+    
+    T2  = pm.data["T2"]
+    mop = pm.data["mop"]
+
+    constraint_cc_conv_voltage_magnitude(pm, i, vmin, vmax, λmin, λmax, T2, mop)
+end
+
+
+
 
 ## branch
 ""
@@ -256,4 +272,33 @@ function constraint_cc_gen_power(pm::AbstractPowerModel, g::Int; nw::Int=nw_id_d
     
     constraint_cc_gen_power_real(pm, g, pmin, pmax, λpmin, λpmax, T2, mop)
     constraint_cc_gen_power_imaginary(pm, g, qmin, qmax, λqmin, λqmax, T2, mop)
+end
+
+
+
+
+#######################################
+#
+function constraint_conv_reactor(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    conv = _PM.ref(pm, nw, :convdc, i)
+    constraint_conv_reactor(pm, nw, i, conv["rc"], conv["xc"], Bool(conv["reactor"]))
+end
+
+#
+function constraint_conv_filter(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    conv = _PM.ref(pm, nw, :convdc, i)
+    constraint_conv_filter(pm, nw, i, conv["bf"], Bool(conv["filter"]) )
+end
+
+#
+function constraint_conv_transformer(pm::_PM.AbstractPowerModel, i::Int; nw::Int=_PM.nw_id_default)
+    conv = _PM.ref(pm, nw, :convdc, i)
+    constraint_conv_transformer(pm, nw, i, conv["rtf"], conv["xtf"], conv["busac_i"], conv["tm"], Bool(conv["transformer"]))
+end
+
+function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
+    bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
+    bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
+    pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
+    constraint_current_balance_dc(pm, nw, bus_arcs_dcgrid, bus_convs_dc, pd)
 end

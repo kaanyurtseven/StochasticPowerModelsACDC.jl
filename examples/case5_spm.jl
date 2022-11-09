@@ -8,6 +8,7 @@ using Ipopt
 using PowerModels
 using StochasticPowerModelsACDC
 using PowerModelsACDC
+using Plots
 
 # constants 
 const _PM = PowerModels
@@ -16,14 +17,15 @@ const _PMACDC = PowerModelsACDC
 
 # solvers
 ##ipopt_solver = Ipopt.Optimizer
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3500)
+#ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3500, "tol"=>1e-5)
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>2000)
 
 # input
 deg  = 2
 
-case = "case5_acdc_SPMACDC_det.m"
+#case = "case5_acdc_SPMACDC_det.m"
 
-#case = "case5_acdc_SPMACDC.m"
+case = "case5_acdc_SPMACDC.m"
 
 #case = "case39_acdc_SPMACDC_det.m"
 
@@ -35,9 +37,9 @@ case = "case5_acdc_SPMACDC_det.m"
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
 
 
-result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
+#result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
 
-result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
+#result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 result_acdc = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt_solver; setting = s)
@@ -73,8 +75,26 @@ print("Objective: ")
 print(result_spmacdc["objective"])
 
 
+pg_sample = sample(result_spmacdc, "gen", 2, "pg"; sample_size=100)
+
+cur_sample1 = sample(result_spmacdc, "branch", 1, "cr_to"; sample_size=100)
+cur_sample2 = sample(result_spmacdc, "branch", 1, "cr_fr"; sample_size=100)
+
+dccur_sample1 = sample(result_spmacdc, "branchdc", 1, "cr_to"; sample_size=100)
+dccur_sample2 = sample(result_spmacdc, "branchdc", 1, "cr_fr"; sample_size=100)
+
+vm_sample1 = sample(result_spmacdc, "busdc", 1, "vm"; sample_size=100)
+vm_sample2 = sample(result_spmacdc, "busdc", 2, "vm"; sample_size=100)
+vm_sample3 = sample(result_spmacdc, "busdc", 3, "vm"; sample_size=100)
+
+histogram(vm_sample1)
 
 
+histogram(pg_sample)
+
+histogram(cur_sample1)
+
+histogram!(-cur_sample2)
 
 
 

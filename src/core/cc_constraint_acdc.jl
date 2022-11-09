@@ -90,6 +90,7 @@ function constraint_cc_reactor_current_to_squared(pm::AbstractACRModel, i, Imax,
                     )
 end
 
+#=
 #Eq. (40)
 function constraint_cc_converter_current_squared(pm::AbstractACRModel, i, Imax, λmax, T2, mop)
     ic_s  = [_PM.var(pm, n, :ic_s, i) for n in sorted_nw_ids(pm)]
@@ -101,6 +102,21 @@ function constraint_cc_converter_current_squared(pm::AbstractACRModel, i, Imax, 
     JuMP.@constraint(pm.model,  _PCE.var(ic_s, T2)
                                <=
                                 ((Imax^2 - _PCE.mean(ic_s, mop)) / λmax)^2
+                    )
+end
+=#
+
+#Eq. (40)
+function constraint_cc_converter_current_squared(pm::AbstractACRModel, i, Imax, λmax, T2, mop)
+    iconv_lin  = [_PM.var(pm, n, :iconv_lin, i) for n in sorted_nw_ids(pm)]
+    
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(iconv_lin, mop) <= Imax^2)
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_lin, T2)
+                               <=
+                                ((Imax^2 - _PCE.mean(iconv_lin, mop)) / λmax)^2
                     )
 end
 

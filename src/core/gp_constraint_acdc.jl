@@ -23,6 +23,7 @@ function constraint_gp_ohms_dc_branch(pm::AbstractACRModel, n::Int, i, T2, T3, f
                                                     for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
                     )
 
+
 end
 
 function constraint_ohms_dc_branch(pm::AbstractACRModel, n::Int, i, f_bus, t_bus, f_idx, t_idx, r, p)
@@ -39,6 +40,8 @@ function constraint_ohms_dc_branch(pm::AbstractACRModel, n::Int, i, f_bus, t_bus
         JuMP.@constraint(pm.model, vmdc_to ==  vmdc_fr - 1/p * r * i_dc_fr)
         JuMP.@constraint(pm.model, vmdc_fr ==  vmdc_to - 1/p * r * i_dc_to)
     end
+
+   # JuMP.@constraint(pm.model, i_dc_fr + i_dc_to == 0)
 
 
 end
@@ -141,6 +144,20 @@ function constraint_gp_converter_current_squared(pm::AbstractACRModel, n::Int, i
                     )
 end
 
+function constraint_gp_converter_current_iconv_lin_squared(pm::AbstractACRModel, n::Int, i, T2, T3)
+
+    iconv_lin_s = _PM.var(pm, n, :iconv_lin_s, i)
+    ic_r  = Dict(nw => _PM.var(pm, nw, :ic_r, i) for nw in _PM.nw_ids(pm))
+    ic_i  = Dict(nw => _PM.var(pm, nw, :ic_i, i) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * iconv_lin_s
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) * 
+                                    (ic_r[n1] * ic_r[n2] + ic_i[n1] * ic_i[n2]) 
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
 
 
 function constraint_gp_converter_limits(pm::AbstractACRModel, n::Int, i, T2, T3, b_idx)
@@ -231,16 +248,27 @@ end
 
 
 function constraint_gp_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i, T2, T3, a, b, c, plmax)
-    iconv_lin  = Dict(nw => _PM.var(pm, nw, :iconv_lin, i) for nw in _PM.nw_ids(pm))
+    iconv_lin = _PM.var(pm, n, :iconv_lin, i)
+    iconv_lin_s = _PM.var(pm, n, :iconv_lin_s, i)
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
 
-    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * (pconv_ac + pconv_dc - a - b*iconv_lin[n]) == c *
-                                                                        sum(T3.get([n1-1,n2-1,n-1]) *
-                                                                        (iconv_lin[n1] * iconv_lin[n2])  
-                                                                        for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm)) 
-    )
+    JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a + c*iconv_lin_s)
 
 end
 
 
+
+
+function constraint_gp_converter_iconv_lin_squared(pm::AbstractACRModel, n::Int, i, T2, T3)
+
+    iconv_lin_s = _PM.var(pm, n, :iconv_lin_s, i)
+    iconv_lin  = Dict(nw => _PM.var(pm, nw, :iconv_lin, i) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * iconv_lin_s 
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) * 
+                                    (iconv_lin[n1] * iconv_lin[n2]) 
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end

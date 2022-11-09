@@ -72,6 +72,7 @@ module StochasticPowerModelsACDC
     export solve_sopf_acdc_iv
 
     export build_stochastic_data
+    export build_stochastic_acdc_data
     export extend_matlab_file
     export pce_coeff, sample, density, print_summary
 end 

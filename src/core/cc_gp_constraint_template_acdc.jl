@@ -47,6 +47,22 @@ function constraint_gp_converter_current_squared(pm::AbstractPowerModel, i::Int;
     constraint_gp_converter_current_squared(pm, nw, i, T2, T3)
 end
 
+function constraint_gp_converter_current_iconv_lin_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+
+    constraint_gp_converter_current_iconv_lin_squared(pm, nw, i, T2, T3)
+end
+
+function constraint_gp_converter_iconv_lin_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+
+    constraint_gp_converter_iconv_lin_squared(pm, nw, i, T2, T3)
+end
+
+
+
 
 function constraint_cc_filter_voltage_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
     vmin = _PM.ref(pm, nw, :convdc, i, "Vmmin")

@@ -42,7 +42,7 @@ function extend_matlab_file(path::String)
     
     for (b,bus) in data["bus"]
 
-        bus["dst_id"]   = 2
+        bus["dst_id"]   = 0
         bus["μ"]        = μ[parse(Int,b)]
         bus["σ"]        = σ[parse(Int,b)]
         bus["λvmin"]    = λ_val

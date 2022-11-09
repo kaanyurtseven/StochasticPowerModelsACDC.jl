@@ -10,6 +10,7 @@
 ## bus
 ""
 function constraint_bus_voltage_ref(pm::AbstractACRModel, n::Int, i::Int)
+
     vr = _PM.var(pm, n, :vr, i)
     vi = _PM.var(pm, n, :vi, i)
 
@@ -58,6 +59,25 @@ function constraint_cc_bus_voltage_magnitude_squared(pm::AbstractACRModel, i, vm
                     )
 end
 
+function constraint_cc_conv_voltage_magnitude(pm::AbstractACRModel, i, vmin, vmax, λmin, λmax, T2, mop)
+    
+    vdcm  = [_PM.var(pm, n, :vdcm, i) for n in sorted_nw_ids(pm)]
+    
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, vmin <= _PCE.mean(vdcm, mop))
+    JuMP.@constraint(pm.model, _PCE.mean(vdcm, mop) <= vmax)
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(vdcm, T2)
+                                <=
+                               ((_PCE.mean(vdcm, mop) - vmin) / λmin)^2
+                    )
+    JuMP.@constraint(pm.model,  _PCE.var(vdcm, T2)
+                               <=
+                                ((vmax - _PCE.mean(vdcm, mop)) / λmax)^2
+                    )
+
+end
+
 ## branch
 ""
 function constraint_cc_branch_series_current_magnitude_squared(pm::AbstractACRModel, b, cmax, λcmax, T2, mop)
@@ -81,10 +101,14 @@ function constraint_cc_gen_power_real(pm::AbstractACRModel, g, pmin, pmax, λmin
      JuMP.@constraint(pm.model,  pmin <= _PCE.mean(pg, mop))
      JuMP.@constraint(pm.model,  _PCE.mean(pg, mop) <= pmax)
      # chance constraint bounds
+     
+     
      JuMP.@constraint(pm.model,  _PCE.var(pg, T2)
                                  <=
                                 ((_PCE.mean(pg, mop) - pmin) / λmin)^2
                    )
+
+    
      JuMP.@constraint(pm.model,  _PCE.var(pg, T2)
                                  <=
                                  ((pmax - _PCE.mean(pg, mop)) / λmax)^2
@@ -98,12 +122,99 @@ function constraint_cc_gen_power_imaginary(pm::AbstractACRModel, g, qmin, qmax, 
     JuMP.@constraint(pm.model,  qmin <= _PCE.mean(qg, mop))
     JuMP.@constraint(pm.model,  _PCE.mean(qg, mop) <= qmax)
     # chance constraint bounds
+    
     JuMP.@constraint(pm.model,  _PCE.var(qg,T2)
                                 <=
                                 ((_PCE.mean(qg,mop) - qmin) / λmin)^2
                     )
+    
     JuMP.@constraint(pm.model,  _PCE.var(qg,T2)
                                <=
                                 ((qmax - _PCE.mean(qg,mop)) / λmax)^2
                     )
 end
+
+
+
+#####################################
+
+function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, rtf, xtf, acbus, tm, transformer)
+    vi_r = _PM.var(pm, n, :vr, acbus)
+    vi_i = _PM.var(pm, n, :vi, acbus)
+    vk_r = _PM.var(pm, n, :vk_r, i)
+    vk_i = _PM.var(pm, n, :vk_i, i)
+
+    iik_r = _PM.var(pm, n, :iik_r, i)
+    iik_i = _PM.var(pm, n, :iik_i, i)
+    iki_r = _PM.var(pm, n, :iki_r, i)
+    iki_i = _PM.var(pm, n, :iki_i, i)
+
+    #TODO add transformation ratio.....
+    if transformer
+        f = JuMP.@constraint(pm.model, vk_r == vi_r - rtf * iik_r + xtf * iik_i) #(24)
+        JuMP.@constraint(pm.model, vk_i == vi_i - rtf * iik_i - xtf * iik_r) #(25)
+        JuMP.@constraint(pm.model, vi_r == vk_r - rtf * iki_r + xtf * iki_i) #reverse
+        JuMP.@constraint(pm.model, vi_i == vk_i - rtf * iki_i - xtf * iki_r) #reverse
+        display(f)
+    else
+        JuMP.@constraint(pm.model, vk_r == vi_r)
+        JuMP.@constraint(pm.model, vk_i == vi_i)
+        JuMP.@constraint(pm.model, iik_r + iki_r == 0)
+        JuMP.@constraint(pm.model, iik_i + iki_i == 0)
+    end
+
+end
+
+function constraint_conv_reactor(pm::_PM.AbstractIVRModel, n::Int, i::Int, rc, xc, reactor)
+    vk_r = _PM.var(pm, n, :vk_r, i)
+    vk_i = _PM.var(pm, n, :vk_i, i)
+    vc_r = _PM.var(pm, n, :vc_r, i)
+    vc_i = _PM.var(pm, n, :vc_i, i)
+
+    ikc_r = _PM.var(pm, n, :ikc_r, i)
+    ikc_i = _PM.var(pm, n, :ikc_i, i)
+    ick_r = _PM.var(pm, n, :ick_r, i)
+    ick_i = _PM.var(pm, n, :ick_i, i)
+    ic_r = _PM.var(pm, n, :ic_r, i)
+    ic_i = _PM.var(pm, n, :ic_i, i)
+
+    JuMP.@constraint(pm.model, ick_r + ic_r == 0) #(20)
+    JuMP.@constraint(pm.model, ick_i + ic_i == 0) #(21)
+
+    if reactor
+        JuMP.@constraint(pm.model, vc_r == vk_r - rc * ikc_r + xc * ikc_i) #(28)
+        JuMP.@constraint(pm.model, vc_i == vk_i - rc * ikc_i - xc * ikc_r) #(29)
+        JuMP.@constraint(pm.model, vk_r == vc_r - rc * ick_r + xc * ick_i) #reverse
+        JuMP.@constraint(pm.model, vk_i == vc_i - rc * ick_i - xc * ick_r) #reverse
+    else
+        JuMP.@constraint(pm.model, vk_r == vc_r)
+        JuMP.@constraint(pm.model, vk_i == vc_i)
+        JuMP.@constraint(pm.model, ikc_r + ick_r == 0)
+        JuMP.@constraint(pm.model, ikc_i + ick_i == 0)
+    end
+end
+
+function constraint_conv_filter(pm::_PM.AbstractIVRModel, n::Int, i::Int, bv, filter)
+    iki_r = _PM.var(pm, n, :iki_r, i)
+    iki_i = _PM.var(pm, n, :iki_i, i)
+    ikc_r = _PM.var(pm, n, :ikc_r, i)
+    ikc_i = _PM.var(pm, n, :ikc_i, i)
+
+    vk_r = _PM.var(pm, n, :vk_r, i)
+    vk_i = _PM.var(pm, n, :vk_i, i)
+
+    JuMP.@constraint(pm.model,   iki_r + ikc_r + bv * filter * vk_i == 0)
+    JuMP.@constraint(pm.model,   iki_i + ikc_i - bv * filter * vk_r == 0)
+end
+
+# Kirchhoff's current law for DC nodes
+function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
+    
+    igrid_dc = _PM.var(pm, n, :igrid_dc)
+    iconv_dc = _PM.var(pm, n, :iconv_dc)
+
+
+    JuMP.@constraint(pm.model, sum(igrid_dc[a] for a in bus_arcs_dcgrid) + sum(iconv_dc[c] for c in bus_convs_dc) == 0) # deal with pd
+
+end
+   
