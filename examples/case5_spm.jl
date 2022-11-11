@@ -34,7 +34,7 @@ file  = joinpath(BASE_DIR, "test/data/matpower", case)
 
 result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
 
-#result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
+result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
 s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 result_acdc = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt_solver; setting = s)
