@@ -34,7 +34,7 @@ end
 function build_sopf_acdc_iv(pm::AbstractPowerModel)
     for (n, network) in _PM.nws(pm) 
         if n == 1
-            bounded = false
+            bounded = true
         else 
             bounded = false
         end
@@ -58,15 +58,16 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         variable_dc_converter_squared(pm, nw=n, bounded=bounded)
 
     end
+    
+    objective_min_expected_generation_cost(pm)
 
     for (n, network) in _PM.nws(pm)
         for i in _PM.ids(pm, :ref_buses, nw=n)
-            constraint_bus_voltage_ref(pm, i, nw=n) #Vr is set to 1.1 (don't forget)
+            constraint_bus_voltage_ref(pm, i, nw=n) 
         end
 
         for i in _PM.ids(pm, :bus, nw=n)
             constraint_current_balance_ac(pm, i, nw=n)
-            #constraint_current_balance(pm, i, nw=n)########################################################
             constraint_gp_bus_voltage_magnitude_squared(pm, i, nw=n)
         end
 
@@ -93,7 +94,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, :branchdc, nw=n)
-            constraint_gp_ohms_dc_branch(pm, i, nw=n) #######################################################
+            constraint_gp_ohms_dc_branch(pm, i, nw=n) 
             constraint_ohms_dc_branch(pm, i, nw=n)
         end
 
@@ -104,14 +105,13 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             constraint_gp_transformer_current_to_squared(pm, i, nw=n)
             constraint_gp_reactor_current_from_squared(pm, i, nw=n)
             constraint_gp_reactor_current_to_squared(pm, i, nw=n)
-            #constraint_gp_converter_current_squared(pm, i, nw=n)
-            constraint_gp_converter_current_iconv_lin_squared(pm, i, nw=n)
 
-            constraint_gp_converter_iconv_lin_squared(pm, i, nw=n)
+            constraint_gp_iconv_lin_squared_1(pm, i, nw=n)
+            constraint_gp_iconv_lin_squared_2(pm, i, nw=n)
 
-            constraint_gp_converter_limits(pm, i, nw=n)
+            constraint_gp_converter_dc_power(pm, i, nw=n)
             constraint_gp_converter_losses(pm, i, nw=n)
-            constraint_gp_converter_current(pm, i, nw=n)
+            constraint_gp_converter_ac_power(pm, i, nw=n)
 
             constraint_conv_transformer(pm, i, nw=n)
             constraint_conv_reactor(pm, i, nw=n)
@@ -156,9 +156,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         constraint_cc_transformer_current_to_squared(pm, i, nw=1) #Checked
         constraint_cc_reactor_current_from_squared(pm, i, nw=1) #Checked
         constraint_cc_reactor_current_to_squared(pm, i, nw=1) #Checked
-        #constraint_cc_converter_current_squared(pm, i, nw=1)
 
     end
 
-    objective_min_expected_generation_cost(pm)
 end

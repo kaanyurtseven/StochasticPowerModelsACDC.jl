@@ -16,28 +16,23 @@ const _SPMACDC = StochasticPowerModelsACDC
 const _PMACDC = PowerModelsACDC
 
 # solvers
-##ipopt_solver = Ipopt.Optimizer
-#ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3500, "tol"=>1e-5)
+#ipopt_solver = Ipopt.Optimizer
 ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>2000)
 
 # input
 deg  = 2
 
-#case = "case5_acdc_SPMACDC_det.m"
-
 case = "case5_acdc_SPMACDC.m"
 
-#case = "case39_acdc_SPMACDC_det.m"
+#case = "case39_acdc_SPMACDC.m"
 
-#case = "case67acdc_scopf_SPMACDC_det.m"
-
-#case = "case67acdc_scopf_SPMACDC.m"
+#case = "case67_acdc_scopf_SPMACDC.m"
 
 
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
 
 
-#result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
+result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
 
 #result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
@@ -45,33 +40,6 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 result_acdc = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt_solver; setting = s)
 
 result_spmacdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
-
-#_SPMACDC.print_summary(result_spm["solution"])
-#_SPMACDC.print_summary(result_spmacdc["solution"])
-
-idx = 1;
-
-result_acdc["solution"]["gen"]["$idx"]
-
-result_spmacdc["solution"]["nw"]["1"]["gen"]["$idx"]
-
-result_acdc["solution"]["bus"]["$idx"]["vr"]
-
-result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vr"]
-
-result_acdc["solution"]["bus"]["$idx"]["vi"]
-
-result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vi"]
-
-result_acdc["solution"]["busdc"]["$idx"]["vm"]
-
-result_spmacdc["solution"]["nw"]["1"]["busdc"]["$idx"]["vm"]
-
-result_spmacdc["solution"]["nw"]["1"]["branchdc"]["$idx"]
-
-
-vr_sample1 = sample(result_spmacdc, "bus", idx, "vr"; sample_size=100)
-histogram(vr_sample1)
 
 println("\n\n>>> OPF Results >>>")
 println(result_opf["primal_status"])
@@ -97,6 +65,68 @@ print("Objective: ")
 print(result_spmacdc["objective"])
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#=
+
+idx = 1;
+
+result_acdc["solution"]["gen"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["1"]["gen"]["$idx"]
+
+result_acdc["solution"]["bus"]["$idx"]["vr"]
+
+result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vr"]
+
+result_acdc["solution"]["bus"]["$idx"]["vi"]
+
+result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vi"]
+
+result_acdc["solution"]["busdc"]["$idx"]["vm"]
+
+result_spmacdc["solution"]["nw"]["1"]["busdc"]["$idx"]["vm"]
+
+result_spmacdc["solution"]["nw"]["1"]["branchdc"]["$idx"]
+
+
+vr_sample1 = sample(result_spmacdc, "bus", idx, "vr"; sample_size=100)
+histogram(vr_sample1)
+
 pg_sample = sample(result_spmacdc, "gen", 2, "pg"; sample_size=100)
 
 cur_sample1 = sample(result_spmacdc, "branch", 1, "cr_to"; sample_size=100)
@@ -119,7 +149,7 @@ histogram(cur_sample1)
 histogram!(-cur_sample2)
 
 
-
+=#
 
 
 #=

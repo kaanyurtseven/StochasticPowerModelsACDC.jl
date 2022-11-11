@@ -42,48 +42,18 @@ function variable_dc_converter(pm::_PM.AbstractIVRModel; nw::Int=nw_id_default, 
 
 end
 
-#=
-########### CONVERTER AC SIDE VOLTAGES   ##############################
-"real part of the voltage variable k at the filter bus"
-function variable_filter_voltage_real(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
-    
-    vk_r = _PM.var(pm, nw)[:vk_r] = JuMP.@variable(pm.model,
-        [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_vk_r",
-        start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "vr_start", 1.0)
-    )
-
-    if bounded
-        for (i, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vk_r[i], -convdc["Vmmax"])
-            JuMP.set_upper_bound(vk_r[i],  convdc["Vmmax"])
-        end
-    end
-
-    report && _PM.sol_component_value(pm, nw, :convdc, :vk_r, _PM.ids(pm, nw, :convdc), vk_r)
-end
-=#
-
 function variable_dc_converter_squared(pm::_PM.AbstractIVRModel; nw::Int=nw_id_default, bounded::Bool=true,report::Bool=true, kwargs...)
     
 
-    variable_filter_voltage_squared(pm, nw=nw, bounded=bounded, kwargs...)                # v ct gp cc
-    variable_converter_voltage_squared(pm, nw=nw, bounded=bounded, kwargs...)             # v ct gp cc
-    variable_transformer_current_from_squared(pm, nw=nw, bounded=bounded,  kwargs...)      # v ct gp cc
-    variable_transformer_current_to_squared(pm, nw=nw, bounded=bounded,  kwargs...)        # v ct gp cc
-    variable_reactor_current_from_squared(pm, nw=nw, bounded=bounded,  kwargs...)          # v ct gp cc
-    variable_reactor_current_to_squared(pm, nw=nw, bounded=bounded,  kwargs...)            # v ct gp cc
-    ##variable_converter_current_squared(pm, nw=nw, bounded=bounded, report=report; kwargs...)             # v ct gp cc
-   # variable_converter_current_dc_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)          # v
-    variable_converter_current_lin_squared(pm, nw=nw, bounded=bounded,  kwargs...)         # v
+    variable_filter_voltage_squared(pm, nw=nw, bounded=bounded, kwargs...)                  # v ct gp cc
+    variable_converter_voltage_squared(pm, nw=nw, bounded=bounded, kwargs...)               # v ct gp cc
+    variable_transformer_current_from_squared(pm, nw=nw, bounded=bounded,  kwargs...)       # v ct gp cc
+    variable_transformer_current_to_squared(pm, nw=nw, bounded=bounded,  kwargs...)         # v ct gp cc
+    variable_reactor_current_from_squared(pm, nw=nw, bounded=bounded,  kwargs...)           # v ct gp cc
+    variable_reactor_current_to_squared(pm, nw=nw, bounded=bounded,  kwargs...)             # v ct gp cc
+    variable_converter_current_lin_squared(pm, nw=nw, bounded=bounded,  kwargs...)          # v
     
-    #variable_converter_active_power_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)        #
-    #variable_converter_reactive_power_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)      #
-    #variable_dcside_power_squared(pm, nw=n, bounded=bounded, report=report; kwargs...)                  #
-
 end
-
-
-
 
 function variable_filter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
 
@@ -208,24 +178,6 @@ function variable_converter_current_squared(pm::_PM.AbstractPowerModel; nw::Int=
     report && _PM.sol_component_value(pm, nw, :convdc, :ic_s, _PM.ids(pm, nw, :convdc), ic_s)
 end
 
-#=
-function variable_converter_current_dc_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1.2;
-    vpu = 1;
-    iconv_dc_s = _PM.var(pm, nw)[:iconv_dc_s] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_dc_s",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
-    )
-    if bounded
-        for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iconv_dc_s[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(iconv_dc_s[c],   convdc["Pacrated"]/vpu * bigM)
-        end
-    end
-
-    report && _PM.sol_component_value(pm, nw, :convdc, :iconv_dc_s, _PM.ids(pm, nw, :convdc), iconv_dc_s)
-end
-=#
 
 function variable_converter_current_lin_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
     bigM = 1;
@@ -237,30 +189,13 @@ function variable_converter_current_lin_squared(pm::_PM.AbstractPowerModel; nw::
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
             JuMP.set_lower_bound(iconv_lin_s[c],  0)
-            JuMP.set_upper_bound(iconv_lin_s[c],  convdc["Imax"] * bigM * 2)
+            JuMP.set_upper_bound(iconv_lin_s[c],  convdc["Imax"] * vpu * bigM)
         end
     end
 
     report && _PM.sol_component_value(pm, nw, :convdc, :iconv_lin_s, _PM.ids(pm, nw, :convdc), iconv_lin_s)
 end
 
-#=
-function variable_converter_active_power_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    pc = _PM.var(pm, nw)[:pconv_ac] = JuMP.@variable(pm.model,
-    [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_pconv_ac",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "P_g", 1.0)
-    )
-
-    if bounded
-        for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(pc[c],  convdc["Pacmin"])
-            JuMP.set_upper_bound(pc[c],  convdc["Pacmax"])
-        end
-    end
-
-    report && _IM.sol_component_value(pm, _PM.pm_it_sym, nw, :convdc, :pconv, _PM.ids(pm, nw, :convdc), pc)
-end
-=#
 
 
 

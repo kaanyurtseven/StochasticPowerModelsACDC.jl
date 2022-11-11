@@ -205,15 +205,7 @@ function constraint_current_balance_ac(pm::AbstractIVRModel, n::Int, i, bus_arcs
                                 - sum(cid[d] for d in bus_loads)
                                 - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
                                 )
-                                
-#=
-    JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
-                                ==
-                                sum(cig[g] for g in bus_gens)
-                                - sum(cid[d] for d in bus_loads)
-                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
-                                )
-=#
+
 end
 
 

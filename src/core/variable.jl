@@ -36,28 +36,6 @@ function variable_dcbranch_current(pm::AbstractACRModel; nw::Int=nw_id_default, 
 
 end
 
-#=
-function variable_dc_converter(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
-            
-   
-    _PMACDC.variable_conv_tranformer_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_conv_reactor_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-
-    _PMACDC.variable_converter_active_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_reactive_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_acside_current(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_dcside_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_firing_angle(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-
-    _PMACDC.variable_converter_filter_voltage(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_internal_voltage(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-
-    _PMACDC.variable_converter_to_grid_active_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-    _PMACDC.variable_converter_to_grid_reactive_power(pm, nw=nw, bounded=bounded, report=report; kwargs...)
-
-end
-=#
-
 
 "variable: `vms[i]` for `i` in `bus`"
 function variable_bus_voltage_magnitude_squared(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)

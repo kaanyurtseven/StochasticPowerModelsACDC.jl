@@ -46,11 +46,15 @@ module StochasticPowerModelsACDC
 
     # include
     include("core/constraint.jl")
-    include("core/gp_constraint_acdc.jl")
-    include("core/cc_constraint_acdc.jl")
+    #include("core/gp_constraint_acdc.jl")
+    include("core/gp_constraint.jl")
+    #include("core/cc_constraint_acdc.jl")
+    include("core/cc_constraint.jl")
 
     include("core/constraint_template.jl")
-    include("core/cc_gp_constraint_template_acdc.jl")
+    include("core/cc_constraint_template.jl")
+    include("core/gp_constraint_template.jl")
+    #include("core/cc_gp_constraint_template_acdc.jl")
 
     include("core/objective.jl")
 

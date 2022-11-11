@@ -41,7 +41,6 @@ function constraint_ohms_dc_branch(pm::AbstractACRModel, n::Int, i, f_bus, t_bus
         JuMP.@constraint(pm.model, vmdc_fr ==  vmdc_to - 1/p * r * i_dc_to)
     end
 
-   # JuMP.@constraint(pm.model, i_dc_fr + i_dc_to == 0)
 
 
 end
@@ -144,7 +143,7 @@ function constraint_gp_converter_current_squared(pm::AbstractACRModel, n::Int, i
                     )
 end
 
-function constraint_gp_converter_current_iconv_lin_squared(pm::AbstractACRModel, n::Int, i, T2, T3)
+function constraint_gp_iconv_lin_squared_1(pm::AbstractACRModel, n::Int, i, T2, T3)
 
     iconv_lin_s = _PM.var(pm, n, :iconv_lin_s, i)
     ic_r  = Dict(nw => _PM.var(pm, nw, :ic_r, i) for nw in _PM.nw_ids(pm))
@@ -160,34 +159,12 @@ end
 
 
 
-function constraint_gp_converter_limits(pm::AbstractACRModel, n::Int, i, T2, T3, b_idx)
-
-#=
-
-    ic_s = _PM.var(pm, n, :ic_s, i)
-    iconv_lin  = Dict(nw => _PM.var(pm, nw, :iconv_lin, i) for nw in _PM.nw_ids(pm))
-
-    #iconv_lin = _PM.var(pm, n, :iconv_lin)[i]
-
-
-
-    #Eq. (48)
-    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * ic_s ==  
-                                                    sum(T3.get([n1-1,n2-1,n-1]) * 
-                                                    (iconv_lin[n1] * iconv_lin[n2]) 
-                                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
-                    )
-
-=#
+function constraint_gp_converter_dc_power(pm::AbstractACRModel, n::Int, i, T2, T3, b_idx)
 
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     iconv_dc  = Dict(nw => _PM.var(pm, nw, :iconv_dc, i) for nw in _PM.nw_ids(pm))
     vdcm  = Dict(nw => _PM.var(pm, nw, :vdcm, b_idx) for nw in _PM.nw_ids(pm))
-    #=
-    vc = _PM.var(pm, n, :vdcm)[b_idx]
-    pconv_dc = _PM.var(pm, n, :pconv_dc)[i]
-    iconv_dc = _PM.var(pm, n, :iconv_dc)[i]
-    =#
+
     #Eq. (43)
     JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * pconv_dc ==  
                                                     sum(T3.get([n1-1,n2-1,n-1]) * 
@@ -197,24 +174,7 @@ function constraint_gp_converter_limits(pm::AbstractACRModel, n::Int, i, T2, T3,
 
 end
 
-#=
-function constraint_gp_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i::Int, T2, T3, a, b, c, plmax)
-    iconv_lin = _PM.var(pm, n, :iconv_lin, i)
-    pconv_ac = _PM.var(pm, n, :pconv_ac, i)
-    pconv_dc = _PM.var(pm, n, :pconv_dc, i)
-    #Eq. (47)
-    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * pconv_ac +
-                                 T2.get([n-1,n-1]) * pconv_dc == 
-                                                            a + b*T2.get([n-1,n-1])*iconv_lin + 
-                                                            c * sum(T3.get([n1-1,n2-1,n-1]) * 
-                                                            (iconv_lin[n1] * iconv_lin[n2]) 
-                                                            for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
-    
-                    )
-end
-
-=#
-function constraint_gp_converter_current(pm::_PM.AbstractIVRModel, n::Int, i::Int, T2, T3, Umax, Imax)
+function constraint_gp_converter_ac_power(pm::_PM.AbstractIVRModel, n::Int, i::Int, T2, T3)
     vc_r = Dict(nw => _PM.var(pm, nw, :vc_r, i) for nw in _PM.nw_ids(pm))
     vc_i = Dict(nw => _PM.var(pm, nw, :vc_i, i) for nw in _PM.nw_ids(pm))
     ic_r = Dict(nw => _PM.var(pm, nw, :ic_r, i) for nw in _PM.nw_ids(pm))
@@ -260,7 +220,7 @@ end
 
 
 
-function constraint_gp_converter_iconv_lin_squared(pm::AbstractACRModel, n::Int, i, T2, T3)
+function constraint_gp_iconv_lin_squared_2(pm::AbstractACRModel, n::Int, i, T2, T3)
 
     iconv_lin_s = _PM.var(pm, n, :iconv_lin_s, i)
     iconv_lin  = Dict(nw => _PM.var(pm, nw, :iconv_lin, i) for nw in _PM.nw_ids(pm))
@@ -269,6 +229,19 @@ function constraint_gp_converter_iconv_lin_squared(pm::AbstractACRModel, n::Int,
                                 ==
                                 sum(T3.get([n1-1,n2-1,n-1]) * 
                                     (iconv_lin[n1] * iconv_lin[n2]) 
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
+function constraint_gp_bus_voltage_magnitude_squared(pm::AbstractACRModel, n::Int, i, T2, T3)
+    vms = _PM.var(pm, n, :vms, i)
+    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
+    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * vms 
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) * 
+                                    (vr[n1] * vr[n2] + vi[n1] * vi[n2]) 
                                     for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
                     )
 end
