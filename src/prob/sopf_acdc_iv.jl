@@ -33,30 +33,35 @@ end
 ""
 function build_sopf_acdc_iv(pm::AbstractPowerModel)
     for (n, network) in _PM.nws(pm) 
+        if n == 1
+            bounded = false
+        else 
+            bounded = false
+        end
 
         _PM.variable_dcline_current(pm, nw=n)
 
         variable_bus_voltage(pm, nw=n)
 
-        variable_branch_current(pm, nw=n)
+        variable_branch_current(pm, nw=n, bounded=bounded)
 
-        variable_gen_power(pm, nw=n, bounded=false)                             # enforcing bounds alters the objective 
-        variable_gen_current(pm, nw=n, bounded=false)                           # enforcing bounds makes problem infeasible
-        variable_load_current(pm, nw=n)
+        variable_gen_power(pm, nw=n, bounded=bounded)                             # enforcing bounds alters the objective 
+        variable_gen_current(pm, nw=n, bounded=bounded)                           # enforcing bounds makes problem infeasible
+        variable_load_current(pm, nw=n, bounded=bounded)
 
         #DC grid variables
-        variable_active_dcbranch_flow(pm, nw=n)
-        variable_dcbranch_current(pm, nw=n)
-        variable_dcgrid_voltage_magnitude(pm, nw=n)
+        variable_active_dcbranch_flow(pm, nw=n, bounded=bounded)
+        variable_dcbranch_current(pm, nw=n, bounded=bounded)
+        variable_dcgrid_voltage_magnitude(pm, nw=n, bounded=bounded)
         #DC converter variables
-        variable_dc_converter(pm, nw=n, bounded=true)
-        variable_dc_converter_squared(pm, nw=n, bounded=true)
+        variable_dc_converter(pm, nw=n, bounded=bounded)
+        variable_dc_converter_squared(pm, nw=n, bounded=bounded)
 
     end
 
     for (n, network) in _PM.nws(pm)
         for i in _PM.ids(pm, :ref_buses, nw=n)
-            constraint_bus_voltage_ref(pm, i, nw=n)
+            constraint_bus_voltage_ref(pm, i, nw=n) #Vr is set to 1.1 (don't forget)
         end
 
         for i in _PM.ids(pm, :bus, nw=n)
@@ -67,6 +72,8 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
 
         for b in _PM.ids(pm, :branch, nw=n)
             _PM.constraint_voltage_drop(pm, b, nw=n)
+            _PM.constraint_current_from(pm, b, nw=n)
+            _PM.constraint_current_to(pm, b, nw=n)
 
             constraint_gp_branch_series_current_magnitude_squared(pm, b, nw=n)
         end
@@ -91,7 +98,6 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, :convdc, nw=n)
-            println("$i", i)
             constraint_gp_filter_voltage_squared(pm, i, nw=n)
             constraint_gp_converter_voltage_squared(pm, i, nw=n)
             constraint_gp_transformer_current_from_squared(pm, i, nw=n)
@@ -100,6 +106,8 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             constraint_gp_reactor_current_to_squared(pm, i, nw=n)
             #constraint_gp_converter_current_squared(pm, i, nw=n)
             constraint_gp_converter_current_iconv_lin_squared(pm, i, nw=n)
+
+            constraint_gp_converter_iconv_lin_squared(pm, i, nw=n)
 
             constraint_gp_converter_limits(pm, i, nw=n)
             constraint_gp_converter_losses(pm, i, nw=n)
@@ -114,31 +122,41 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
     end
 
     for i in _PM.ids(pm, :bus, nw=1)
-        constraint_cc_bus_voltage_magnitude_squared(pm, i, nw=1)
+        constraint_cc_bus_voltage_magnitude_squared(pm, i, nw=1) #Checked
     end
 
     for b in _PM.ids(pm, :branch, nw=1)
-        constraint_cc_branch_series_current_magnitude_squared(pm, b, nw=1)
+        constraint_cc_branch_series_current_magnitude_squared(pm, b, nw=1) #Checked
     end
 
     for g in _PM.ids(pm, :gen, nw=1)
-        constraint_cc_gen_power(pm, g, nw=1)
+        constraint_cc_gen_power(pm, g, nw=1) #Checked
     end
 
     for i in _PM.ids(pm, :busdc, nw=1)
-        constraint_cc_conv_voltage_magnitude(pm, i, nw=1)
-        constraint_cc_bus_voltage_magnitude_squared(pm, i, nw=1)
+        constraint_cc_conv_voltage_magnitude(pm, i, nw=1) #Checked
+    end
+
+    for i in _PM.ids(pm, :branchdc, nw=1)
+        constraint_cc_dc_branch_current(pm, i, nw=1) #Checked
     end
 
     for i in _PM.ids(pm, :convdc, nw=1)
 
-        constraint_cc_filter_voltage_squared(pm, i, nw=1)
-        constraint_cc_converter_voltage_squared(pm, i, nw=1)
-        constraint_cc_transformer_current_from_squared(pm, i, nw=1)
-        constraint_cc_transformer_current_to_squared(pm, i, nw=1)
-        constraint_cc_reactor_current_from_squared(pm, i, nw=1)
-        constraint_cc_reactor_current_to_squared(pm, i, nw=1)
-        constraint_cc_converter_current_squared(pm, i, nw=1)
+        constraint_cc_iconv_lin_squared(pm, i, nw=1) #Checked
+        constraint_cc_iconv_lin(pm, i, nw=1) #Checked
+
+        constraint_cc_conv_ac_power(pm, i, nw=1) #Checked
+        constraint_cc_conv_dc_power(pm, i, nw=1) #Checked
+        constraint_cc_converter_dc_current(pm, i, nw=1) #Checked
+        
+        constraint_cc_filter_voltage_squared(pm, i, nw=1) #Checked
+        constraint_cc_converter_voltage_squared(pm, i, nw=1) #Checked
+        constraint_cc_transformer_current_from_squared(pm, i, nw=1) #Checked
+        constraint_cc_transformer_current_to_squared(pm, i, nw=1) #Checked
+        constraint_cc_reactor_current_from_squared(pm, i, nw=1) #Checked
+        constraint_cc_reactor_current_to_squared(pm, i, nw=1) #Checked
+        #constraint_cc_converter_current_squared(pm, i, nw=1)
 
     end
 

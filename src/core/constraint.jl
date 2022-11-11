@@ -49,10 +49,12 @@ function constraint_cc_bus_voltage_magnitude_squared(pm::AbstractACRModel, i, vm
     JuMP.@constraint(pm.model, vmin^2 <= _PCE.mean(vms, mop))
     JuMP.@constraint(pm.model, _PCE.mean(vms, mop) <= vmax^2)
     # chance constraint bounds
+    
     JuMP.@constraint(pm.model,  _PCE.var(vms, T2)
                                 <=
                                ((_PCE.mean(vms, mop) - vmin^2) / λmin)^2
                     )
+    
     JuMP.@constraint(pm.model,  _PCE.var(vms, T2)
                                <=
                                 ((vmax^2 - _PCE.mean(vms, mop)) / λmax)^2
@@ -67,6 +69,7 @@ function constraint_cc_conv_voltage_magnitude(pm::AbstractACRModel, i, vmin, vma
     JuMP.@constraint(pm.model, vmin <= _PCE.mean(vdcm, mop))
     JuMP.@constraint(pm.model, _PCE.mean(vdcm, mop) <= vmax)
     # chance constraint bounds
+    
     JuMP.@constraint(pm.model,  _PCE.var(vdcm, T2)
                                 <=
                                ((_PCE.mean(vdcm, mop) - vmin) / λmin)^2
@@ -75,6 +78,7 @@ function constraint_cc_conv_voltage_magnitude(pm::AbstractACRModel, i, vmin, vma
                                <=
                                 ((vmax - _PCE.mean(vdcm, mop)) / λmax)^2
                     )
+    
 
 end
 
@@ -151,11 +155,11 @@ function constraint_conv_transformer(pm::_PM.AbstractIVRModel, n::Int, i::Int, r
 
     #TODO add transformation ratio.....
     if transformer
-        f = JuMP.@constraint(pm.model, vk_r == vi_r - rtf * iik_r + xtf * iik_i) #(24)
+        JuMP.@constraint(pm.model, vk_r == vi_r - rtf * iik_r + xtf * iik_i) #(24)
         JuMP.@constraint(pm.model, vk_i == vi_i - rtf * iik_i - xtf * iik_r) #(25)
         JuMP.@constraint(pm.model, vi_r == vk_r - rtf * iki_r + xtf * iki_i) #reverse
         JuMP.@constraint(pm.model, vi_i == vk_i - rtf * iki_i - xtf * iki_r) #reverse
-        display(f)
+        
     else
         JuMP.@constraint(pm.model, vk_r == vi_r)
         JuMP.@constraint(pm.model, vk_i == vi_i)

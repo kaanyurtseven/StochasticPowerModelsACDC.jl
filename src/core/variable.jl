@@ -39,7 +39,7 @@ end
 #=
 function variable_dc_converter(pm::AbstractACRModel; nw::Int=nw_id_default, bounded::Bool=false, report::Bool=true, kwargs...)
             
-    println("something")
+   
     _PMACDC.variable_conv_tranformer_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PMACDC.variable_conv_reactor_flow(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 

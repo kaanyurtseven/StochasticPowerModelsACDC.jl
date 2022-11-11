@@ -31,7 +31,7 @@ case = "case5_acdc_SPMACDC.m"
 
 #case = "case67acdc_scopf_SPMACDC_det.m"
 
-#case = "case67_acdc_40pen_SPMACDC.m"
+#case = "case67acdc_scopf_SPMACDC.m"
 
 
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
@@ -46,10 +46,32 @@ result_acdc = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt_solver; sett
 
 result_spmacdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
 
-
 #_SPMACDC.print_summary(result_spm["solution"])
 #_SPMACDC.print_summary(result_spmacdc["solution"])
 
+idx = 1;
+
+result_acdc["solution"]["gen"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["1"]["gen"]["$idx"]
+
+result_acdc["solution"]["bus"]["$idx"]["vr"]
+
+result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vr"]
+
+result_acdc["solution"]["bus"]["$idx"]["vi"]
+
+result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vi"]
+
+result_acdc["solution"]["busdc"]["$idx"]["vm"]
+
+result_spmacdc["solution"]["nw"]["1"]["busdc"]["$idx"]["vm"]
+
+result_spmacdc["solution"]["nw"]["1"]["branchdc"]["$idx"]
+
+
+vr_sample1 = sample(result_spmacdc, "bus", idx, "vr"; sample_size=100)
+histogram(vr_sample1)
 
 println("\n\n>>> OPF Results >>>")
 println(result_opf["primal_status"])

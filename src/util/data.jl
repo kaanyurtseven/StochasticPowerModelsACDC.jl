@@ -17,6 +17,7 @@ function extend_matlab_file(path::String)
         bus = load["load_bus"]
         μ[bus] = load["pd"] * baseMVA
         σ[bus] = abs(load["pd"] * baseMVA * 0.10)
+
         #σ[bus] = 0
     end
     #=
@@ -42,7 +43,7 @@ function extend_matlab_file(path::String)
     
     for (b,bus) in data["bus"]
 
-        bus["dst_id"]   = 0
+        bus["dst_id"]   = 1
         bus["μ"]        = μ[parse(Int,b)]
         bus["σ"]        = σ[parse(Int,b)]
         bus["λvmin"]    = λ_val

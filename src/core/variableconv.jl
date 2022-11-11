@@ -1,5 +1,5 @@
 function variable_dc_converter(pm::_PM.AbstractIVRModel; nw::Int=nw_id_default, bounded::Bool=true,report::Bool=false, kwargs...)
-    println("variable_dc_converter")
+    
     
     _PMACDC.variable_filter_voltage_real(pm, nw=nw, bounded=bounded, kwargs...)
     _PMACDC.variable_filter_voltage_imaginary(pm, nw=nw, bounded=bounded, kwargs...)
@@ -46,7 +46,7 @@ end
 ########### CONVERTER AC SIDE VOLTAGES   ##############################
 "real part of the voltage variable k at the filter bus"
 function variable_filter_voltage_real(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool=true, report::Bool=true)
-    println("variable_filter_voltage_real")
+    
     vk_r = _PM.var(pm, nw)[:vk_r] = JuMP.@variable(pm.model,
         [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_vk_r",
         start = _PM.comp_start_value(_PM.ref(pm, nw, :convdc, i), "vr_start", 1.0)
@@ -64,7 +64,7 @@ end
 =#
 
 function variable_dc_converter_squared(pm::_PM.AbstractIVRModel; nw::Int=nw_id_default, bounded::Bool=true,report::Bool=true, kwargs...)
-    println("variable_dc_converter_squared")
+    
 
     variable_filter_voltage_squared(pm, nw=nw, bounded=bounded, kwargs...)                # v ct gp cc
     variable_converter_voltage_squared(pm, nw=nw, bounded=bounded, kwargs...)             # v ct gp cc
@@ -87,7 +87,7 @@ end
 
 function variable_filter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
 
-println("variable_filter_voltage_squared")
+
 
     vk_s = _PM.var(pm, nw)[:vk_s] = JuMP.@variable(pm.model,
         [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_vk_s",

@@ -108,16 +108,177 @@ end
 
 #Eq. (40)
 function constraint_cc_converter_current_squared(pm::AbstractACRModel, i, Imax, λmax, T2, mop)
-    iconv_lin  = [_PM.var(pm, n, :iconv_lin, i) for n in sorted_nw_ids(pm)]
+    iconv_lin_s  = [_PM.var(pm, n, :iconv_lin_s, i) for n in sorted_nw_ids(pm)]
     
     # bounds on the expectation
-    JuMP.@constraint(pm.model, _PCE.mean(iconv_lin, mop) <= Imax^2)
+    JuMP.@constraint(pm.model, _PCE.mean(iconv_lin_s, mop) <= Imax^2)
 
     # chance constraint bounds
-    JuMP.@constraint(pm.model,  _PCE.var(iconv_lin, T2)
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_lin_s, T2)
                                <=
-                                ((Imax^2 - _PCE.mean(iconv_lin, mop)) / λmax)^2
+                                ((Imax^2 - _PCE.mean(iconv_lin_s, mop)) / λmax)^2
                     )
 end
 
 
+function constraint_cc_dc_branch_current(pm::AbstractACRModel, i, Imax, Imin, λmax, λmin, f_idx, t_idx, T2, mop)
+    i_dc_fr = [_PM.var(pm, n, :igrid_dc, f_idx) for n in sorted_nw_ids(pm)]
+    i_dc_to = [_PM.var(pm, n, :igrid_dc, t_idx) for n in sorted_nw_ids(pm)]
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(i_dc_fr, mop) <= Imax)
+
+    JuMP.@constraint(pm.model, Imin <= _PCE.mean(i_dc_fr, mop))
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(i_dc_fr, T2)
+                               <=
+                                ((Imax - _PCE.mean(i_dc_fr, mop)) / λmax)^2
+                    )
+
+    
+    JuMP.@constraint(pm.model,  _PCE.var(i_dc_fr, T2)
+                                <=
+                               ((_PCE.mean(i_dc_fr, mop) - Imin) / λmin)^2
+    )
+    
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(i_dc_to, mop) <= Imax)
+    JuMP.@constraint(pm.model, Imin <= _PCE.mean(i_dc_to, mop))
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(i_dc_to, T2)
+                               <=
+                                ((Imax - _PCE.mean(i_dc_to, mop)) / λmax)^2
+                    )
+    
+    JuMP.@constraint(pm.model,  _PCE.var(i_dc_to, T2)
+                                <=
+                               ((_PCE.mean(i_dc_to, mop) - Imin) / λmin)^2
+    )
+    
+
+end
+
+function constraint_cc_iconv_lin_squared(pm::AbstractACRModel, i, Imax, λmax, T2, mop)
+    iconv_lin_s  = [_PM.var(pm, n, :iconv_lin_s, i) for n in sorted_nw_ids(pm)]
+    
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(iconv_lin_s, mop) <= Imax^2)
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_lin_s, T2)
+                               <=
+                                ((Imax^2 - _PCE.mean(iconv_lin_s, mop)) / λmax)^2
+                    )
+end
+
+function constraint_cc_iconv_lin(pm::AbstractACRModel, i, Imax, λmax, T2, mop)
+    iconv_lin  = [_PM.var(pm, n, :iconv_lin, i) for n in sorted_nw_ids(pm)]
+    
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(iconv_lin, mop) <= Imax)
+    JuMP.@constraint(pm.model, 0 <= _PCE.mean(iconv_lin, mop))
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_lin, T2)
+                               <=
+                                ((Imax - _PCE.mean(iconv_lin, mop)) / λmax)^2
+                    )
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_lin, T2)
+                                <=
+                                ((_PCE.mean(iconv_lin, mop) - 0) / λmax)^2
+                    )
+end
+
+
+function constraint_cc_conv_ac_power_real(pm, i, Pacmin, Pacmax, λmin, λmax, T2, mop)
+    pconv_ac  = [_PM.var(pm, n, :pconv_ac, i) for n in sorted_nw_ids(pm)]
+
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, Pacmin <= _PCE.mean(pconv_ac, mop))
+    JuMP.@constraint(pm.model, _PCE.mean(pconv_ac, mop) <= Pacmax)
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(pconv_ac, T2)
+                            <=
+                            ((_PCE.mean(pconv_ac, mop) - Pacmin) / λmin)^2
+                    )
+
+    JuMP.@constraint(pm.model,  _PCE.var(pconv_ac, T2)
+                            <=
+                            ((Pacmax - _PCE.mean(pconv_ac, mop)) / λmax)^2
+                    )
+
+end
+
+function constraint_cc_conv_ac_power_imaginary(pm, i, Qacmin, Qacmax, λmin, λmax, T2, mop)
+    qconv_ac  = [_PM.var(pm, n, :qconv_ac, i) for n in sorted_nw_ids(pm)]
+
+
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, Qacmin <= _PCE.mean(qconv_ac, mop))
+    JuMP.@constraint(pm.model, _PCE.mean(qconv_ac, mop) <= Qacmax)
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(qconv_ac, T2)
+                            <=
+                            ((_PCE.mean(qconv_ac, mop) - Qacmin) / λmin)^2
+                    )
+
+    JuMP.@constraint(pm.model,  _PCE.var(qconv_ac, T2)
+                            <=
+                            ((Qacmax - _PCE.mean(qconv_ac, mop)) / λmax)^2
+                    )
+
+end
+
+function constraint_cc_conv_dc_power(pm, i, Pdcmin, Pdcmax, λmin, λmax, T2, mop)
+    pconv_dc  = [_PM.var(pm, n, :pconv_dc, i) for n in sorted_nw_ids(pm)]
+
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, Pdcmin <= _PCE.mean(pconv_dc, mop))
+    JuMP.@constraint(pm.model, _PCE.mean(pconv_dc, mop) <= Pdcmax)
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(pconv_dc, T2)
+                            <=
+                            ((_PCE.mean(pconv_dc, mop) - Pdcmin) / λmin)^2
+                    )
+
+    JuMP.@constraint(pm.model,  _PCE.var(pconv_dc, T2)
+                            <=
+                            ((Pdcmax - _PCE.mean(pconv_dc, mop)) / λmax)^2
+                    )
+
+end
+
+
+
+
+function constraint_cc_converter_dc_current(pm::AbstractACRModel, i, Imax, Imin, λmax, λmin, T2, mop)
+    iconv_dc = [_PM.var(pm, n, :iconv_dc, i) for n in sorted_nw_ids(pm)]
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(iconv_dc, mop) <= Imax)
+
+    JuMP.@constraint(pm.model, Imin <= _PCE.mean(iconv_dc, mop))
+
+    # chance constraint bounds
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_dc, T2)
+                               <=
+                                ((Imax - _PCE.mean(iconv_dc, mop)) / λmax)^2
+                    )
+
+    
+    JuMP.@constraint(pm.model,  _PCE.var(iconv_dc, T2)
+                                <=
+                               ((_PCE.mean(iconv_dc, mop) - Imin) / λmin)^2
+    )
+    
+   
+
+end

@@ -182,7 +182,7 @@ function constraint_gp_converter_limits(pm::AbstractACRModel, n::Int, i, T2, T3,
 
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
     iconv_dc  = Dict(nw => _PM.var(pm, nw, :iconv_dc, i) for nw in _PM.nw_ids(pm))
-    vc  = Dict(nw => _PM.var(pm, nw, :vdcm, b_idx) for nw in _PM.nw_ids(pm))
+    vdcm  = Dict(nw => _PM.var(pm, nw, :vdcm, b_idx) for nw in _PM.nw_ids(pm))
     #=
     vc = _PM.var(pm, n, :vdcm)[b_idx]
     pconv_dc = _PM.var(pm, n, :pconv_dc)[i]
@@ -191,7 +191,7 @@ function constraint_gp_converter_limits(pm::AbstractACRModel, n::Int, i, T2, T3,
     #Eq. (43)
     JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * pconv_dc ==  
                                                     sum(T3.get([n1-1,n2-1,n-1]) * 
-                                                    (vc[n1] * iconv_dc[n2]) 
+                                                    (vdcm[n1] * iconv_dc[n2]) 
                                                     for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
                     )
 
@@ -253,7 +253,7 @@ function constraint_gp_converter_losses(pm::_PM.AbstractIVRModel, n::Int, i, T2,
     pconv_ac = _PM.var(pm, n, :pconv_ac, i)
     pconv_dc = _PM.var(pm, n, :pconv_dc, i)
 
-    JuMP.@NLconstraint(pm.model, pconv_ac + pconv_dc == a + c*iconv_lin_s)
+    JuMP.@constraint(pm.model, pconv_ac + pconv_dc == a + b * iconv_lin + c * iconv_lin_s)
 
 end
 
