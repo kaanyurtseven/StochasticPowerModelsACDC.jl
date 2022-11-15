@@ -336,6 +336,7 @@ function constraint_cc_branch_series_current_magnitude_squared(pm::AbstractACRMo
                     )
 end
 
+
 function constraint_cc_gen_power_real(pm::AbstractACRModel, g, pmin, pmax, λmin, λmax, T2, mop)
     pg  = [_PM.var(pm, nw, :pg, g) for nw in sorted_nw_ids(pm)]
 

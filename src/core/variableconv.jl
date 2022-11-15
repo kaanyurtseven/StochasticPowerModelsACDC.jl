@@ -66,8 +66,8 @@ function variable_filter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_id_d
 
     if bounded
         for (i, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vk_s[i], -convdc["Vmmax"])
-            JuMP.set_upper_bound(vk_s[i],  convdc["Vmmax"])
+            JuMP.set_lower_bound(vk_s[i], convdc["Vmmin"]^2)
+            JuMP.set_upper_bound(vk_s[i], convdc["Vmmax"]^2)
         end
     end
     report && _PM.sol_component_value(pm, nw, :convdc, :vk_s, _PM.ids(pm, nw, :convdc), vk_s)
@@ -83,8 +83,8 @@ function variable_converter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_i
 
     if bounded
         for (i, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vc_s[i], -convdc["Vmmax"])
-            JuMP.set_upper_bound(vc_s[i],  convdc["Vmmax"])
+            JuMP.set_lower_bound(vc_s[i], convdc["Vmmin"]^2)
+            JuMP.set_upper_bound(vc_s[i], convdc["Vmmax"]^2)
         end
     end
 
@@ -101,8 +101,8 @@ function variable_transformer_current_from_squared(pm::_PM.AbstractPowerModel; n
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iik_s[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(iik_s[c],   convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_lower_bound(iik_s[c],  0)
+            JuMP.set_upper_bound(iik_s[c],  (convdc["Pacrated"]^2)/vpu * bigM)
         end
     end
 
@@ -119,8 +119,8 @@ function variable_transformer_current_to_squared(pm::_PM.AbstractPowerModel; nw:
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(iki_s[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(iki_s[c],   convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_lower_bound(iki_s[c],  0)
+            JuMP.set_upper_bound(iki_s[c],  (convdc["Pacrated"]^2)/vpu * bigM)
         end
     end
 
@@ -136,8 +136,8 @@ function variable_reactor_current_from_squared(pm::_PM.AbstractPowerModel; nw::I
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ikc_s[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(ikc_s[c],   convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_lower_bound(ikc_s[c],  0)
+            JuMP.set_upper_bound(ikc_s[c],  (convdc["Pacrated"]^2)/vpu * bigM)
         end
     end
 
@@ -153,8 +153,8 @@ function variable_reactor_current_to_squared(pm::_PM.AbstractPowerModel; nw::Int
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ick_s[c],  -convdc["Pacrated"]/vpu * bigM)
-            JuMP.set_upper_bound(ick_s[c],   convdc["Pacrated"]/vpu * bigM)
+            JuMP.set_lower_bound(ick_s[c],  0)
+            JuMP.set_upper_bound(ick_s[c],  (convdc["Pacrated"]^2)/vpu * bigM)
         end
     end
 
@@ -170,8 +170,8 @@ function variable_converter_current_squared(pm::_PM.AbstractPowerModel; nw::Int=
     )
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(ic_s[c],  -convdc["Imax"] * bigM)
-            JuMP.set_upper_bound(ic_s[c],   convdc["Imax"]* bigM)
+            JuMP.set_lower_bound(ic_s[c],  0)
+            JuMP.set_upper_bound(ic_s[c],  (convdc["Imax"]^2) * bigM)
         end
     end
 
@@ -189,7 +189,7 @@ function variable_converter_current_lin_squared(pm::_PM.AbstractPowerModel; nw::
     if bounded
         for (c, convdc) in _PM.ref(pm, nw, :convdc)
             JuMP.set_lower_bound(iconv_lin_s[c],  0)
-            JuMP.set_upper_bound(iconv_lin_s[c],  convdc["Imax"] * vpu * bigM)
+            JuMP.set_upper_bound(iconv_lin_s[c],  (convdc["Imax"]^2) * vpu * bigM)
         end
     end
 

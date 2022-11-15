@@ -124,7 +124,7 @@ function constraint_cc_iconv_lin_squared(pm::AbstractPowerModel, i::Int; nw::Int
     vpu = 1;
     conv = _PM.ref(pm, nw, :convdc, i)
     
-    Imax = conv["Pacrated"]/vpu
+    Imax = conv["Imax"]
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     
@@ -138,7 +138,7 @@ function constraint_cc_iconv_lin(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_d
     vpu = 1;
     conv = _PM.ref(pm, nw, :convdc, i)
     
-    Imax = conv["Pacrated"]/vpu
+    Imax = conv["Imax"]
     Imin = 0
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
@@ -186,10 +186,11 @@ end
 
 function constraint_cc_converter_dc_current(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
     vpu = 1;
+    bigM = 1.2;
     conv = _PM.ref(pm, nw, :convdc, i)
     
-    Imax = conv["Pacrated"]/vpu
-    Imin = - conv["Pacrated"]/vpu
+    Imax = conv["Pacrated"]/vpu * bigM
+    Imin = - conv["Pacrated"]/vpu * bigM
     
     λmax = _PM.ref(pm, nw, :convdc, i, "λvmax")
     λmin = _PM.ref(pm, nw, :convdc, i, "λvmin")

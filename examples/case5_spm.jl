@@ -17,14 +17,15 @@ const _PMACDC = PowerModelsACDC
 
 # solvers
 #ipopt_solver = Ipopt.Optimizer
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>2000)
+#ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3000, "fixed_variable_treatment" => "relax_bounds")
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3000)
 
 # input
 deg  = 2
 
 case = "case5_acdc_SPMACDC.m"
 
-#case = "case39_acdc_SPMACDC.m"
+#case = "case39_acdc2_SPMACDC.m"
 
 #case = "case67_acdc_scopf_SPMACDC.m"
 
@@ -75,53 +76,46 @@ print(result_spmacdc["objective"])
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #=
 
+
 idx = 1;
+nw_idx = 1;
 
 result_acdc["solution"]["gen"]["$idx"]
 
-result_spmacdc["solution"]["nw"]["1"]["gen"]["$idx"]
+result_spmacdc["solution"]["nw"]["$nw_idx"]["gen"]["$idx"]
 
 result_acdc["solution"]["bus"]["$idx"]["vr"]
 
-result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vr"]
+result_spmacdc["solution"]["nw"]["$nw_idx"]["bus"]["$idx"]["vr"]
+
+result_acdc["solution"]["branch"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["branch"]["$idx"]
 
 result_acdc["solution"]["bus"]["$idx"]["vi"]
 
-result_spmacdc["solution"]["nw"]["1"]["bus"]["$idx"]["vi"]
+result_spmacdc["solution"]["nw"]["$nw_idx"]["bus"]["$idx"]["vi"]
 
 result_acdc["solution"]["busdc"]["$idx"]["vm"]
 
-result_spmacdc["solution"]["nw"]["1"]["busdc"]["$idx"]["vm"]
+result_spmacdc["solution"]["nw"]["$nw_idx"]["busdc"]["$idx"]["vm"]
 
-result_spmacdc["solution"]["nw"]["1"]["branchdc"]["$idx"]
+result_acdc["solution"]["branchdc"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["branchdc"]["$idx"]
+
+
+
+pg_coeff = pce_coeff(result_spmacdc, "gen", 1, "pg") 
+
+pg_coeff = pce_coeff(result_spmacdc, "gen", 1, "crg") 
+
+pg_coeff = pce_coeff(result_spmacdc, "gen", 1, "qg") 
+
+pg_coeff = pce_coeff(result_spmacdc, "gen", 1, "cig") 
+
 
 
 vr_sample1 = sample(result_spmacdc, "bus", idx, "vr"; sample_size=100)

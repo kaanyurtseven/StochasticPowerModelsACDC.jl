@@ -46,8 +46,8 @@ function variable_bus_voltage_magnitude_squared(pm::AbstractPowerModel; nw::Int=
 
     if bounded
         for (i, bus) in _PM.ref(pm, nw, :bus)
-            JuMP.set_lower_bound(vms[i], -2.0 * bus["vmax"]^2)
-            JuMP.set_upper_bound(vms[i],  2.0 * bus["vmax"]^2)
+            JuMP.set_lower_bound(vms[i], 0)
+            JuMP.set_upper_bound(vms[i], 2.0 * bus["vmax"]^2)
         end
     end
 
@@ -86,7 +86,7 @@ function variable_branch_series_current_magnitude_squared(pm::AbstractPowerModel
             end
 
             if !isinf(ub)
-                JuMP.set_lower_bound(cmss[l], -2.0 * ub^2)
+                JuMP.set_lower_bound(cmss[l], 0)
                 JuMP.set_upper_bound(cmss[l],  2.0 * ub^2)
             end
         end

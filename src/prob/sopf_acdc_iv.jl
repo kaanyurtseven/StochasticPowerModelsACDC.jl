@@ -41,7 +41,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
 
         _PM.variable_dcline_current(pm, nw=n)
 
-        variable_bus_voltage(pm, nw=n)
+        variable_bus_voltage(pm, nw=n, bounded=bounded)
 
         variable_branch_current(pm, nw=n, bounded=bounded)
 
@@ -75,6 +75,10 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             _PM.constraint_voltage_drop(pm, b, nw=n)
             _PM.constraint_current_from(pm, b, nw=n)
             _PM.constraint_current_to(pm, b, nw=n)
+            _PM.constraint_voltage_angle_difference(pm, b, nw=n)
+
+            _PM.constraint_thermal_limit_from(pm, b, nw=n)
+            _PM.constraint_thermal_limit_to(pm, b, nw=n)
 
             constraint_gp_branch_series_current_magnitude_squared(pm, b, nw=n)
         end
@@ -98,7 +102,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             constraint_ohms_dc_branch(pm, i, nw=n)
         end
 
-        for i in _PM.ids(pm, :convdc, nw=n)
+         for i in _PM.ids(pm, :convdc, nw=n)
             constraint_gp_filter_voltage_squared(pm, i, nw=n)
             constraint_gp_converter_voltage_squared(pm, i, nw=n)
             constraint_gp_transformer_current_from_squared(pm, i, nw=n)
@@ -117,7 +121,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             constraint_conv_reactor(pm, i, nw=n)
             constraint_conv_filter(pm, i, nw=n)
 
-        end
+         end
 
     end
 
@@ -126,11 +130,11 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
     end
 
     for b in _PM.ids(pm, :branch, nw=1)
-        constraint_cc_branch_series_current_magnitude_squared(pm, b, nw=1) #Checked
+        constraint_cc_branch_series_current_magnitude_squared(pm, b, nw=1) #Checked ######
     end
 
     for g in _PM.ids(pm, :gen, nw=1)
-        constraint_cc_gen_power(pm, g, nw=1) #Checked
+        constraint_cc_gen_power(pm, g, nw=1) #Checked #####
     end
 
     for i in _PM.ids(pm, :busdc, nw=1)
@@ -149,6 +153,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         constraint_cc_conv_ac_power(pm, i, nw=1) #Checked
         constraint_cc_conv_dc_power(pm, i, nw=1) #Checked
         constraint_cc_converter_dc_current(pm, i, nw=1) #Checked
+        
         
         constraint_cc_filter_voltage_squared(pm, i, nw=1) #Checked
         constraint_cc_converter_voltage_squared(pm, i, nw=1) #Checked
