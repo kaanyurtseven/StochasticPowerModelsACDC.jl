@@ -41,9 +41,9 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
 
         _PM.variable_dcline_current(pm, nw=n)
 
-        variable_bus_voltage(pm, nw=n, bounded=bounded)
+        variable_bus_voltage(pm, nw=n, bounded=false)
 
-        variable_branch_current(pm, nw=n, bounded=bounded)
+        variable_branch_current(pm, nw=n, bounded=false)
 
         variable_gen_power(pm, nw=n, bounded=bounded)                             # enforcing bounds alters the objective 
         variable_gen_current(pm, nw=n, bounded=bounded)                           # enforcing bounds makes problem infeasible
@@ -73,12 +73,12 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
 
         for b in _PM.ids(pm, :branch, nw=n)
             _PM.constraint_voltage_drop(pm, b, nw=n)
-            _PM.constraint_current_from(pm, b, nw=n)
-            _PM.constraint_current_to(pm, b, nw=n)
-            _PM.constraint_voltage_angle_difference(pm, b, nw=n)
+            # _PM.constraint_current_from(pm, b, nw=n)
+            # _PM.constraint_current_to(pm, b, nw=n)
+            # _PM.constraint_voltage_angle_difference(pm, b, nw=n)
 
-            _PM.constraint_thermal_limit_from(pm, b, nw=n)
-            _PM.constraint_thermal_limit_to(pm, b, nw=n)
+            # _PM.constraint_thermal_limit_from(pm, b, nw=n)
+            # _PM.constraint_thermal_limit_to(pm, b, nw=n)
 
             constraint_gp_branch_series_current_magnitude_squared(pm, b, nw=n)
         end

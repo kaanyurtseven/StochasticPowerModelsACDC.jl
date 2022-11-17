@@ -25,14 +25,14 @@ deg  = 2
 
 case = "case5_acdc_SPMACDC.m"
 
-#case = "case39_acdc2_SPMACDC.m"
+#case = "case39_acdc_SPMACDC.m"
 
 #case = "case67_acdc_scopf_SPMACDC.m"
 
 
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
 
-
+ 
 result_opf = _PM.solve_opf(file, _PM.ACPPowerModel, ipopt_solver)
 
 result_spm = solve_sopf_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
@@ -71,13 +71,7 @@ print(result_spmacdc["objective"])
 
 
 
-
-
-
-
-
 #=
-
 
 idx = 1;
 nw_idx = 1;
@@ -107,6 +101,15 @@ result_acdc["solution"]["branchdc"]["$idx"]
 result_spmacdc["solution"]["nw"]["$nw_idx"]["branchdc"]["$idx"]
 
 
+
+vm_sample1 = sample(result_spmacdc, "busdc", 1, "vm"; sample_size=1000)
+
+q_sample1 = sample(result_spmacdc, "gen", 1, "qg"; sample_size=1000)
+
+histogram(vm_sample1)
+
+
+pg_coeff = pce_coeff(result_spmacdc, "gen", 1, "pg") 
 
 pg_coeff = pce_coeff(result_spmacdc, "gen", 1, "pg") 
 

@@ -14,32 +14,33 @@ function extend_matlab_file(path::String)
     Nb   = length(data["bus"])
     μ, σ = zeros(Nb), zeros(Nb)
     for (l,load) in data["load"]
+
         bus = load["load_bus"]
         μ[bus] = load["pd"] * baseMVA
-        σ[bus] = abs(load["pd"] * baseMVA * 0.10)
-
+        # μ[bus] = 0.5 * load["pd"] * baseMVA
+        σ[bus] = abs(load["pd"] * baseMVA * 0.05)
         #σ[bus] = 0
     end
-    #=
-    for (b,bus) in data["bus"]
+    
+    # for (b,bus) in data["bus"]
 
-        if parse(Int,b) == 2 || parse(Int,b) == 5 || parse(Int,b) == 67
+    #     if parse(Int,b) == 2 || parse(Int,b) == 5 || parse(Int,b) == 10 || parse(Int,b) == 20
             
-            bus["dst_id"]   = 1
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = 1.03643
-            bus["λvmax"]    = 1.03643
-        else
-            bus["dst_id"]   = 0
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = 1.03643
-            bus["λvmax"]    = 1.03643
-        end
+    #         bus["dst_id"]   = 1
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     else
+    #         bus["dst_id"]   = 0
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     end
 
-    end
-    =#
+    # end
+    
     
     for (b,bus) in data["bus"]
 

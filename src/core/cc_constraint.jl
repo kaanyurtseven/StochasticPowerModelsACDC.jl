@@ -319,6 +319,11 @@ function constraint_cc_conv_voltage_magnitude(pm::AbstractACRModel, i, vmin, vma
                                <=
                                 ((vmax - _PCE.mean(vdcm, mop)) / λmax)^2
                     )
+
+    JuMP.@constraint(pm.model,  _PCE.var(vdcm, T2)
+                                <=
+                                (0.00001)
+                    )
     
 
 end

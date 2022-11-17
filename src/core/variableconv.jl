@@ -66,8 +66,8 @@ function variable_filter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_id_d
 
     if bounded
         for (i, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vk_s[i], convdc["Vmmin"]^2)
-            JuMP.set_upper_bound(vk_s[i], convdc["Vmmax"]^2)
+            JuMP.set_lower_bound(vk_s[i], (1/2)*convdc["Vmmin"]^2)
+            JuMP.set_upper_bound(vk_s[i], 2*convdc["Vmmax"]^2)
         end
     end
     report && _PM.sol_component_value(pm, nw, :convdc, :vk_s, _PM.ids(pm, nw, :convdc), vk_s)
@@ -83,8 +83,8 @@ function variable_converter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_i
 
     if bounded
         for (i, convdc) in _PM.ref(pm, nw, :convdc)
-            JuMP.set_lower_bound(vc_s[i], convdc["Vmmin"]^2)
-            JuMP.set_upper_bound(vc_s[i], convdc["Vmmax"]^2)
+            JuMP.set_lower_bound(vc_s[i], (1/2)*convdc["Vmmin"]^2)
+            JuMP.set_upper_bound(vc_s[i], 2*convdc["Vmmax"]^2)
         end
     end
 
@@ -93,7 +93,7 @@ function variable_converter_voltage_squared(pm::AbstractPowerModel; nw::Int=nw_i
 end
 
 function variable_transformer_current_from_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 2;
     vpu = 1;
     iik_s = _PM.var(pm, nw)[:iik_s] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iik_s",
@@ -111,7 +111,7 @@ end
 
 
 function variable_transformer_current_to_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 2;
     vpu = 1;
     iki_s = _PM.var(pm, nw)[:iki_s] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iki_s",
@@ -128,7 +128,7 @@ function variable_transformer_current_to_squared(pm::_PM.AbstractPowerModel; nw:
 end
 
 function variable_reactor_current_from_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 2;
     vpu = 1;
     ikc_s = _PM.var(pm, nw)[:ikc_s] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ikc_s",
@@ -145,7 +145,7 @@ function variable_reactor_current_from_squared(pm::_PM.AbstractPowerModel; nw::I
 end
 
 function variable_reactor_current_to_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 2;
     vpu = 1;
     ick_s = _PM.var(pm, nw)[:ick_s] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ick_s",
@@ -162,7 +162,7 @@ function variable_reactor_current_to_squared(pm::_PM.AbstractPowerModel; nw::Int
 end
 
 function variable_converter_current_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 2;
     vpu = 1;
     ic_s = _PM.var(pm, nw)[:ic_s] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_ic_s",
@@ -180,7 +180,7 @@ end
 
 
 function variable_converter_current_lin_squared(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    bigM = 1;
+    bigM = 2;
     vpu = 1;
     iconv_lin_s = _PM.var(pm, nw)[:iconv_lin_s] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :convdc)], base_name="$(nw)_iconv_lin_s",
