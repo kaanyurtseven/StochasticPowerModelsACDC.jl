@@ -207,10 +207,8 @@ end
 
 exp_cost_export = Dict()
 [exp_cost_export["$pen_level"] = result_acdc["$pen_level"]["Expected Cost"] for pen_level in keys(result_acdc)]
-
 CC_export = Dict()
 [CC_export["$pen_level"] = result_acdc["$pen_level"]["CC"] for pen_level in keys(result_acdc)]
-
 
 file_name = "Results\\MC Results $case.xlsx"
 fid    = XLSX.openxlsx(file_name, mode="w")
