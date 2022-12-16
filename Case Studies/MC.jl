@@ -154,8 +154,6 @@ for pen_level_dummy = pen_level_start:pen_level_step:pen_level_end
             end
 
             if solve_case
-                
-                display([data["load"]["$i"]["pd"] for i in keys(data["load"])])
                 global result_acdc["$pen_level"]["MC Results"]["$MC_sample"] = _PMACDC.run_acdcopf(data, _PM.ACPPowerModel, ipopt_solver; setting = s)
             end
         end
