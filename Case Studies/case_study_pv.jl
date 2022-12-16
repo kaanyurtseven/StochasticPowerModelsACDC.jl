@@ -24,7 +24,7 @@ Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
 #Solver inputs
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5, "max_iter"=>3000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>5000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
 
 #gPC degree input
 deg  = 2
@@ -32,7 +32,7 @@ deg  = 2
 #PV inputs
 pen_level_start = 0.00
 pen_level_step = 0.05
-pen_level_end = 0.10
+pen_level_end = 1.00
 
 #Necessary initializations
 obj_case1 = Dict()
@@ -73,17 +73,17 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
     end
 
     #Store necessary values for reporting
-    obj_case1[pen_level] = result_spmacdc_case1["objective"] 
+    # obj_case1[pen_level] = result_spmacdc_case1["objective"] 
     obj_case2[pen_level] = result_spmacdc_case2["objective"] 
-    stat_case1[pen_level] = string(result_spmacdc_case1["primal_status"])
+    # stat_case1[pen_level] = string(result_spmacdc_case1["primal_status"])
     stat_case2[pen_level] = string(result_spmacdc_case2["primal_status"])
     p_size_dict[pen_level] = p_size
 
-    if string(result_spmacdc_case1["primal_status"]) != "FEASIBLE_POINT"
-        global feas_ctr1 += 1
-    else
-        global feas_ctr1 = 0
-    end
+    # if string(result_spmacdc_case1["primal_status"]) != "FEASIBLE_POINT"
+    #     global feas_ctr1 += 1
+    # else
+    #     global feas_ctr1 = 0
+    # end
 
 
     if string(result_spmacdc_case2["primal_status"]) != "FEASIBLE_POINT"

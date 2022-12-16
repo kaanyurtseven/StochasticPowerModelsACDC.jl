@@ -29,12 +29,15 @@ Random.seed!(1234)
 ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>3000, "sb"=>"yes")
 
 #Monte-Carlo Simulation inputs
-MC_size = 5;
+MC_size = 2000;
 
 #PV inputs
 pen_level_start = 0.00
 pen_level_step = 0.05
-pen_level_end = 0.10
+pen_level_end = 1.00
+
+#Report decision
+Report = false
 
 #Uncertain input parameters
 load_std1 = 0.1;
@@ -45,7 +48,7 @@ PV_pf = 0.9;
 global load_bus_gauss_1 = 3
 global load_bus_gauss_2 = 4
 
-#Desired Chance-Constraint level
+#Minimum allowed chance-constraint level
 global CC_level = 0.90
 
 #Case file and data reading
@@ -53,7 +56,8 @@ case = "case5_ACDC.m"
 file  = joinpath(BASE_DIR, "test/data/matpower/Case Studies", case)
 data = _PM.parse_file(file)
 _PMACDC.process_additional_data!(data)
-data_org = data #Store the original data
+data_org = _PM.parse_file(file)
+_PMACDC.process_additional_data!(data_org) #Store the original data
 
 #Necessary initializations
 load_means = Dict()
@@ -128,7 +132,7 @@ for pen_level_dummy = pen_level_start:pen_level_step:pen_level_end
         PV_sample["$pen_level"] = rand(PV_dist, MC_size)
 
         for MC_sample = 1:MC_size
-            # println("   MC_sample = $MC_sample")
+            println("   MC_sample = $MC_sample")
             for (i, load) in data["load"]
                 bus = load["load_bus"]
                 if bus == load_bus_gauss_1
@@ -150,6 +154,8 @@ for pen_level_dummy = pen_level_start:pen_level_step:pen_level_end
             end
 
             if solve_case
+                
+                display([data["load"]["$i"]["pd"] for i in keys(data["load"])])
                 global result_acdc["$pen_level"]["MC Results"]["$MC_sample"] = _PMACDC.run_acdcopf(data, _PM.ACPPowerModel, ipopt_solver; setting = s)
             end
         end
@@ -199,20 +205,22 @@ for pen_level_dummy = pen_level_start:pen_level_step:pen_level_end
 end
 
 # Reporting
-if contains(case, "ACDC")
-    case = "ACDC";
-else
-    case = "AC";
+if Report
+    if contains(case, "ACDC")
+        case = "ACDC";
+    else
+        case = "AC";
+    end
+
+    exp_cost_export = Dict()
+    [exp_cost_export["$pen_level"] = result_acdc["$pen_level"]["Expected Cost"] for pen_level in keys(result_acdc)]
+    CC_export = Dict()
+    [CC_export["$pen_level"] = result_acdc["$pen_level"]["CC"] for pen_level in keys(result_acdc)]
+
+    file_name = "Results\\MC Results $case.xlsx"
+    fid    = XLSX.openxlsx(file_name, mode="w")
+    header = ["Penetration Level"; "Expected Cost"; "CC";]
+    export_data   = [[collect(keys(result_acdc))]; [collect(values(exp_cost_export))]; [collect(values(CC_export))]]
+    XLSX.writetable(file_name, export_data, header)
 end
-
-exp_cost_export = Dict()
-[exp_cost_export["$pen_level"] = result_acdc["$pen_level"]["Expected Cost"] for pen_level in keys(result_acdc)]
-CC_export = Dict()
-[CC_export["$pen_level"] = result_acdc["$pen_level"]["CC"] for pen_level in keys(result_acdc)]
-
-file_name = "Results\\MC Results $case.xlsx"
-fid    = XLSX.openxlsx(file_name, mode="w")
-header = ["Penetration Level"; "Expected Cost"; "CC";]
-export_data   = [[collect(keys(result_acdc))]; [collect(values(exp_cost_export))]; [collect(values(CC_export))]]
-XLSX.writetable(file_name, export_data, header)
 
