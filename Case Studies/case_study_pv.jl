@@ -100,8 +100,6 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
         global solve_case2 = false
     end
 
-
-
 end
 
 
@@ -112,10 +110,10 @@ end
 # print("Objective: ")
 # print(result_spmacdc_case1["objective"])
 
-println("\n\n>>> SPMACDC Results - Case 2 >>>")
-println(result_spmacdc_case2["primal_status"])
-print("Objective: ")
-print(result_spmacdc_case2["objective"])
+# println("\n\n>>> SPMACDC Results - Case 2 >>>")
+# println(result_spmacdc_case2["primal_status"])
+# print("Objective: ")
+# print(result_spmacdc_case2["objective"])
 
 #Reporting
 
