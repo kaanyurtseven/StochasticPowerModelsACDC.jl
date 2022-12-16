@@ -132,7 +132,7 @@ for pen_level_dummy = pen_level_start:pen_level_step:pen_level_end
         PV_sample["$pen_level"] = rand(PV_dist, MC_size)
 
         for MC_sample = 1:MC_size
-            println("   MC_sample = $MC_sample")
+            # println("   MC_sample = $MC_sample")
             for (i, load) in data["load"]
                 bus = load["load_bus"]
                 if bus == load_bus_gauss_1

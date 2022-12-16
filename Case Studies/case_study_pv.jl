@@ -119,13 +119,13 @@ print(result_spmacdc_case2["objective"])
 
 #Reporting
 
-# file_name1 = "Results\\gPC Results - Case1.xlsx"
+# file_name1 = "Results\\gPC Results - $case1.xlsx"
 # fid    = XLSX.openxlsx(file_name1, mode="w")
 # header = ["Penetration Level";"Objective Value";"Status"]
 # data   = [[collect(keys(obj_case1))];[collect(values(obj_case1))];[collect(values(stat_case1))] ]
 # XLSX.writetable(file_name1, data,header)
 
-file_name2 = "Results\\gPC Results - Case2.xlsx"
+file_name2 = "Results\\gPC Results - $case2.xlsx"
 fid    = XLSX.openxlsx(file_name2, mode="w")
 header = ["Penetration Level";"Objective Value";"Status"]
 data   = [[collect(keys(obj_case2))];[collect(values(obj_case2))];[collect(values(stat_case2))] ]
