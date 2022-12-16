@@ -14,6 +14,13 @@ function mpc = case5_acdc()
 %%-----  Power Flow Data  -----%%
 %% system MVA base
 mpc.baseMVA = 100;
+%% stochastic data
+%column_names%  dst         pa      pb
+mpc.sdata = [
+                'Normal'    0.0     0.0;				
+                'Beta'		2.0		5.0;
+                'Beta'		5.0		2.0;
+];
 
 %% bus data
 %	bus_i	type	Pd	Qd	Gs	Bs	area	Vm      Va	baseKV	zone	Vmax	Vmin

@@ -29,7 +29,7 @@ Random.seed!(1234)
 ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>3000, "sb"=>"yes")
 
 #Monte-Carlo Simulation inputs
-MC_size = 2000;
+MC_size = 1000;
 
 #PV inputs
 pen_level_start = 0.00
@@ -37,7 +37,7 @@ pen_level_step = 0.05
 pen_level_end = 1.00
 
 #Report decision
-Report = false
+Report = true
 
 #Uncertain input parameters
 load_std1 = 0.1;
@@ -215,7 +215,7 @@ if Report
     CC_export = Dict()
     [CC_export["$pen_level"] = result_acdc["$pen_level"]["CC"] for pen_level in keys(result_acdc)]
 
-    file_name = "Results\\MC Results $case.xlsx"
+    file_name = "Results\\MC Results (iter = $MC_size) $case.xlsx"
     fid    = XLSX.openxlsx(file_name, mode="w")
     header = ["Penetration Level"; "Expected Cost"; "CC";]
     export_data   = [[collect(keys(result_acdc))]; [collect(values(exp_cost_export))]; [collect(values(CC_export))]]

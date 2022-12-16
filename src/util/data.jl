@@ -5,272 +5,7 @@ function extend_matlab_file_AC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 1.65; #1.03643
-
-    # general data
-    baseMVA = data["baseMVA"]
-
-    # bus data 
-    Nb   = length(data["bus"])
-    μ, σ = zeros(Nb), zeros(Nb)
-    # for (l,load) in data["load"]
-
-    #     bus = load["load_bus"]
-    #     μ[bus] = load["pd"] * baseMVA
-    #     # μ[bus] = 0.5 * load["pd"] * baseMVA
-    #     σ[bus] = abs(load["pd"] * baseMVA * 0.10)
-    #     #σ[bus] = 0
-    # end
-
-    for (l,load) in data["load"]
-
-        bus = load["load_bus"]
-        μ[bus] = load["pd"] * baseMVA
-
-        if bus == 3
-            σ[bus] = abs(load["pd"] * baseMVA * 0.10)
-
-        elseif bus == 4
-            σ[bus] = abs(load["pd"] * baseMVA * 0.15)
-        
-        else
-            σ[bus] = 0
-
-        end
-    end
-    
-    for (b,bus) in data["bus"]
-
-        if parse(Int,b) == 3
-            
-            bus["dst_id"]   = 1
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        
-        elseif parse(Int,b) == 4
-            
-            bus["dst_id"]   = 2
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        
-        else
-            bus["dst_id"]   = 0
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        end
-
-    end
-
-    # for (b,bus) in data["bus"]
-
-    #     if parse(Int,b) == 2 || parse(Int,b) == 15
-            
-    #         bus["dst_id"]   = 1
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-        
-    #     elseif parse(Int,b) == 5
-            
-    #         bus["dst_id"]   = 2
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-        
-    #     else
-    #         bus["dst_id"]   = 0
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-    #     end
-
-    # end
-    
-    
-    # for (b,bus) in data["bus"]
-
-    #     bus["dst_id"]   = 1
-    #     bus["μ"]        = μ[parse(Int,b)]
-    #     bus["σ"]        = σ[parse(Int,b)]
-    #     bus["λvmin"]    = λ_val
-    #     bus["λvmax"]    = λ_val
-
-
-    # end
-    
-    # generator data
-    for (g,gen) in data["gen"]
-        gen["λpmin"] = λ_val
-        gen["λpmax"] = λ_val
-        gen["λqmin"] = λ_val
-        gen["λqmax"] = λ_val
-    end
-
-    # branch data
-    for (l,branch) in data["branch"]
-        branch["λcmax"] = λ_val
-    end
-
-    # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC.m", data)
-end
-
-function extend_matlab_file_ACDC(path::String)
-    # data
-    data = _PM.parse_file(path)
-
-    λ_val = 1.65;
-
-    # general data
-    baseMVA = data["baseMVA"]
-
-    # bus data 
-    Nb   = length(data["bus"])
-    μ, σ = zeros(Nb), zeros(Nb)
-    # for (l,load) in data["load"]
-
-    #     bus = load["load_bus"]
-    #     μ[bus] = load["pd"] * baseMVA
-    #     # μ[bus] = 0.5 * load["pd"] * baseMVA
-    #     σ[bus] = abs(load["pd"] * baseMVA * 0.10)
-    #     #σ[bus] = 0
-    # end
-
-    for (l,load) in data["load"]
-
-        bus = load["load_bus"]
-        μ[bus] = load["pd"] * baseMVA
-
-        if bus == 3
-            σ[bus] = abs(load["pd"] * baseMVA * 0.10)
-
-        elseif bus == 4
-            σ[bus] = abs(load["pd"] * baseMVA * 0.15)
-        
-        else
-            σ[bus] = 0
-
-        end
-    end
-    
-    for (b,bus) in data["bus"]
-
-        if parse(Int,b) == 3
-            
-            bus["dst_id"]   = 1
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        
-        elseif parse(Int,b) == 4
-            
-            bus["dst_id"]   = 2
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        
-        else
-            bus["dst_id"]   = 0
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        end
-
-    end
-
-    # for (b,bus) in data["bus"]
-
-    #     if parse(Int,b) == 2 || parse(Int,b) == 15
-            
-    #         bus["dst_id"]   = 1
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-        
-    #     elseif parse(Int,b) == 5
-            
-    #         bus["dst_id"]   = 2
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-        
-    #     else
-    #         bus["dst_id"]   = 0
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-    #     end
-
-    # end
-        
-    # for (b,bus) in data["bus"]
-
-    #     bus["dst_id"]   = 1
-    #     bus["μ"]        = μ[parse(Int,b)]
-    #     bus["σ"]        = σ[parse(Int,b)]
-    #     bus["λvmin"]    = λ_val
-    #     bus["λvmax"]    = λ_val
-
-
-    # end
-
-    # dcbus data 
-    for (b,busdc) in data["busdc"]
-        busdc["λvmin"]    = λ_val
-        busdc["λvmax"]    = λ_val
-    end
-
-    # convdc data 
-    for (b,convdc) in data["convdc"]
-        convdc["λvmin"]    = λ_val
-        convdc["λvmax"]    = λ_val
-    end
-
-
-    # generator data
-    for (g,gen) in data["gen"]
-        gen["λpmin"] = λ_val
-        gen["λpmax"] = λ_val
-        gen["λqmin"] = λ_val
-        gen["λqmax"] = λ_val
-    end
-
-    # branch data
-    for (l,branch) in data["branch"]
-        branch["λcmax"] = λ_val
-    end
-
-    # dc branch data
-    for (l,branchdc) in data["branchdc"]
-        branchdc["λcmax"] = λ_val
-    end
-
-    # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC.m", data)
-end
-
-function extend_matlab_file_ACDC_PV(path::String)
-    # data
-    data = _PM.parse_file(path)
-
-    data["PV"]=deepcopy(data["load"]);
-
-    λ_val = 1.61;
+    λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643
 
     # general data
     baseMVA = data["baseMVA"]
@@ -287,18 +22,194 @@ function extend_matlab_file_ACDC_PV(path::String)
         #σ[bus] = 0
     end
 
-   
+    # for (l,load) in data["load"]
+
+    #     bus = load["load_bus"]
+    #     μ[bus] = load["pd"] * baseMVA
+
+    #     if bus == 3
+    #         σ[bus] = abs(load["pd"] * baseMVA * 0.10)
+
+    #     elseif bus == 4
+    #         σ[bus] = abs(load["pd"] * baseMVA * 0.15)
+        
+    #     else
+    #         σ[bus] = 0
+
+    #     end
+    # end
+    
+    # for (b,bus) in data["bus"]
+
+    #     if parse(Int,b) == 3
+            
+    #         bus["dst_id"]   = 1
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     elseif parse(Int,b) == 4
+            
+    #         bus["dst_id"]   = 2
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     else
+    #         bus["dst_id"]   = 0
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     end
+
+    # end
+
     for (b,bus) in data["bus"]
 
-        if parse(Int,b) == 2 || parse(Int,b) == 5 || parse(Int,b) == 67
+        if parse(Int,b) == 6
+            
+            bus["dst_id"]   = 1
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
+        
+        elseif parse(Int,b) == 20
             
             bus["dst_id"]   = 2
             bus["μ"]        = μ[parse(Int,b)]
             bus["σ"]        = σ[parse(Int,b)]
             bus["λvmin"]    = λ_val
             bus["λvmax"]    = λ_val
+        
         else
+            bus["dst_id"]   = 0
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
+        end
+
+    end
+    
+    
+    # for (b,bus) in data["bus"]
+
+    #     bus["dst_id"]   = 1
+    #     bus["μ"]        = μ[parse(Int,b)]
+    #     bus["σ"]        = σ[parse(Int,b)]
+    #     bus["λvmin"]    = λ_val
+    #     bus["λvmax"]    = λ_val
+
+
+    # end
+    
+    # generator data
+    for (g,gen) in data["gen"]
+        gen["λpmin"] = λ_val
+        gen["λpmax"] = λ_val
+        gen["λqmin"] = λ_val
+        gen["λqmax"] = λ_val
+    end
+
+    # branch data
+    for (l,branch) in data["branch"]
+        branch["λcmax"] = λ_val
+    end
+
+    # export file
+    _PM.export_file(path[1:end-2] * "_SPMACDC_95cc.m", data)
+end
+
+function extend_matlab_file_ACDC(path::String)
+    # data
+    data = _PM.parse_file(path)
+
+    λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643
+
+    # general data
+    baseMVA = data["baseMVA"]
+
+    # bus data 
+    Nb   = length(data["bus"])
+    μ, σ = zeros(Nb), zeros(Nb)
+    for (l,load) in data["load"]
+
+        bus = load["load_bus"]
+        μ[bus] = load["pd"] * baseMVA
+        # μ[bus] = 0.5 * load["pd"] * baseMVA
+        σ[bus] = abs(load["pd"] * baseMVA * 0.10)
+        #σ[bus] = 0
+    end
+
+    # for (l,load) in data["load"]
+
+    #     bus = load["load_bus"]
+    #     μ[bus] = load["pd"] * baseMVA
+
+    #     if bus == 3
+    #         σ[bus] = abs(load["pd"] * baseMVA * 0.10)
+
+    #     elseif bus == 4
+    #         σ[bus] = abs(load["pd"] * baseMVA * 0.15)
+        
+    #     else
+    #         σ[bus] = 0
+
+    #     end
+    # end
+    
+    # for (b,bus) in data["bus"]
+
+    #     if parse(Int,b) == 3
+            
+    #         bus["dst_id"]   = 1
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     elseif parse(Int,b) == 4
+            
+    #         bus["dst_id"]   = 2
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     else
+    #         bus["dst_id"]   = 0
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     end
+
+    # end
+
+    for (b,bus) in data["bus"]
+
+        if parse(Int,b) == 6
+            
             bus["dst_id"]   = 1
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
+        
+        elseif parse(Int,b) == 20
+            
+            bus["dst_id"]   = 2
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
+        
+        else
+            bus["dst_id"]   = 0
             bus["μ"]        = μ[parse(Int,b)]
             bus["σ"]        = σ[parse(Int,b)]
             bus["λvmin"]    = λ_val
@@ -350,9 +261,8 @@ function extend_matlab_file_ACDC_PV(path::String)
     end
 
     # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC.m", data)
+    _PM.export_file(path[1:end-2] * "_SPMACDC_95cc.m", data)
 end
-
 
 function get_pu_bases(MVAbase, kVbase)
     eurobase = 1 #
