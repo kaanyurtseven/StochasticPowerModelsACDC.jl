@@ -5,7 +5,7 @@ function extend_matlab_file_AC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643
+    λ_val = 1.61; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643
 
     # general data
     baseMVA = data["baseMVA"]
@@ -128,7 +128,7 @@ function extend_matlab_file_ACDC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643
+    λ_val = 1.61; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643
 
     # general data
     baseMVA = data["baseMVA"]

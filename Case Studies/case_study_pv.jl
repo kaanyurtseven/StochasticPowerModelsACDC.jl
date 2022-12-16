@@ -24,14 +24,14 @@ Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
 #Solver inputs
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>3000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>5000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
 
 #gPC degree input
 deg  = 2
 
 #PV inputs
 pen_level_start = 0.00
-pen_level_step = 0.05
+pen_level_step = 0.01
 pen_level_end = 2.00
 
 #Report decision
@@ -82,23 +82,25 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
     stat_case2[pen_level] = string(result_spmacdc_case2["primal_status"])
     p_size_dict[pen_level] = p_size
 
-    if string(result_spmacdc_case1["primal_status"]) != "FEASIBLE_POINT"
+    if string(result_spmacdc_case1["primal_status"]) != "FEASIBLE_POINT" && string(result_spmacdc_case1["primal_status"]) !="NEARLY_FEASIBLE_POINT"
         global feas_ctr1 += 1
     else
         global feas_ctr1 = 0
     end
 
-    if string(result_spmacdc_case2["primal_status"]) != "FEASIBLE_POINT"
+    if string(result_spmacdc_case2["primal_status"]) != "FEASIBLE_POINT" && string(result_spmacdc_case2["primal_status"]) !="NEARLY_FEASIBLE_POINT"
         global feas_ctr2 += 1
     else
         global feas_ctr2 = 0
     end
 
-    if feas_ctr1 >= 3
+    if feas_ctr1 >= 2
         global solve_case1 = false
+        println("Case 1 reached infeasibility on penetration level of $pen_level.")
     end
 
-    if feas_ctr2 >= 3
+    if feas_ctr2 >= 2
+        println("Case 2 reached infeasibility on penetration level of $pen_level.")
         global solve_case2 = false
     end
 
