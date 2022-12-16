@@ -209,6 +209,47 @@ function constraint_current_balance_ac(pm::AbstractIVRModel, n::Int, i, bus_arcs
 end
 
 
+# current balance with PV
+""
+function constraint_current_balance_with_PV(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs, bus_PV)
+    vr = _PM.var(pm, n, :vr, i)
+    vi = _PM.var(pm, n, :vi, i)
+
+    cr = _PM.var(pm, n, :cr)
+    ci = _PM.var(pm, n, :ci)
+    cidc = _PM.var(pm, n, :cidc)
+
+    iik_r = _PM.var(pm, n, :iik_r)
+    iik_i = _PM.var(pm, n, :iik_i)
+
+    crd = _PM.var(pm, n, :crd)
+    cid = _PM.var(pm, n, :cid)
+    crg = _PM.var(pm, n, :crg)
+    cig = _PM.var(pm, n, :cig)
+
+    crd_pv = _PM.var(pm, n, :crd_pv)
+    cid_pv = _PM.var(pm, n, :cid_pv)
+    #p_size = _PM.var(pm, 1, :p_size)
+
+    JuMP.@constraint(pm.model,  sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
+                                ==
+                                sum(crg[g] for g in bus_gens)
+                                - sum(crd[d] for d in bus_loads)
+                                + sum(crd_pv[p] for p in bus_PV)  #*p_size[p]
+                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
+                                )
+    
+    JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
+                                + sum(cidc[d] for d in bus_arcs_dc)
+                                ==
+                                sum(cig[g] for g in bus_gens)
+                                - sum(cid[d] for d in bus_loads)
+                                + sum(cid_pv[p] for p in bus_PV) #*p_size[p]
+                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
+                                )
+end
+
+
 # galerkin projection constraint
 ## branch
 ""

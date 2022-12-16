@@ -18,6 +18,7 @@ module StochasticPowerModelsACDC
     import PolyChaos
     import PowerModels
     import PowerModelsACDC
+    import Random, Distributions
 
     # import types
     import PowerModels: AbstractPowerModel, AbstractACRModel, AbstractIVRModel
@@ -65,6 +66,7 @@ module StochasticPowerModelsACDC
 
     include("prob/sopf_iv.jl")
     include("prob/sopf_acdc_iv.jl")
+    include("prob/sopf_acdc_PV.jl")
 
     include("util/data.jl")
     include("util/util.jl")
@@ -74,9 +76,13 @@ module StochasticPowerModelsACDC
 
     export solve_sopf_iv
     export solve_sopf_acdc_iv
+    export solve_sopf_acdc_PV
 
     export build_stochastic_data
+    export build_sopf_acdc_PV
     export build_stochastic_acdc_data
-    export extend_matlab_file
+    #export extend_matlab_file
+    export extend_matlab_file_AC
+    export extend_matlab_file_ACDC
     export pce_coeff, sample, density, print_summary
 end 

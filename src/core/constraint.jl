@@ -102,3 +102,38 @@ function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arc
 
 end
    
+
+function constraint_gp_pv_power_real(pm::AbstractIVRModel, n::Int, i, p, pd, T2, T3, p_size; curt=0.0)
+        
+    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
+    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+
+    crd_pv = Dict(nw => _PM.var(pm, nw, :crd_pv, p) for nw in _PM.nw_ids(pm))
+    cid_pv = Dict(nw => _PM.var(pm, nw, :cid_pv, p) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * pd * p_size *(1-curt)
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vr[n1] * crd_pv[n2] + vi[n1] * cid_pv[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+        
+end
+
+function constraint_gp_pv_power_imaginary(pm::AbstractIVRModel, n::Int, i, p, qd, T2, T3, q_size; curt=0.0)
+    
+    vr  = Dict(n => _PM.var(pm, n, :vr, i) for n in _PM.nw_ids(pm))
+    vi  = Dict(n => _PM.var(pm, n, :vi, i) for n in _PM.nw_ids(pm))
+
+    crd_pv = Dict(n => _PM.var(pm, n, :crd_pv, p) for n in _PM.nw_ids(pm))
+    cid_pv = Dict(n => _PM.var(pm, n, :cid_pv, p) for n in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * qd * q_size * (1-curt)
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vi[n1] * crd_pv[n2] - vr[n1] * cid_pv[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
+

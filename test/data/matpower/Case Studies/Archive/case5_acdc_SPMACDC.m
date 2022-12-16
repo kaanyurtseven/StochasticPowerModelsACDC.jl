@@ -5,7 +5,7 @@ mpc.version = '2';
 %column_names% pa dst pb 
 mpc.sdata = [
 	0.0	'Normal'	0.0
-	2.0 'Beta' 		5.0
+	5.0 'Beta' 		2.0
 ];
 
 %%-----  Power Flow Data  -----%%
@@ -45,10 +45,8 @@ mpc.branch = [
 %    1    startup    shutdown    n    x1    y1    ...    xn    yn
 %    2    startup    shutdown    n    c(n-1)    ...    c0
 mpc.gencost = [
-	%2	0.0	0.0	2	1.0	0.0
-	%2	0.0	0.0	2	2.0	0.0
-	2	 0.0	 0.0	 3	   0.000000	  14.707625	   0.000000; % COW
-	2	 0.0	 0.0	 3	   0.000000	  24.804734	   0.000000; % COW	
+	2	0.0	0.0	2	1.0	0.0
+	2	0.0	0.0	2	2.0	0.0
 ];
 
 %column_names% μ dst_id λvmax σ λvmin 

@@ -101,3 +101,106 @@ function variable_gen_power(pm::AbstractACRModel; nw::Int=nw_id_default, bounded
     _PM.variable_gen_power_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
     _PM.variable_gen_power_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
 end
+
+function variable_PV_current(pm::AbstractIVRModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true, kwargs...)
+
+    variable_PV_current_real(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+    variable_PV_current_imaginary(pm, nw=nw, bounded=bounded, report=report; kwargs...)
+end
+
+# load current
+"variable: `crd[j]` for `j` in `load`"
+function variable_PV_current_real(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+    crd_pv = _PM.var(pm, nw)[:crd_pv] = JuMP.@variable(pm.model,
+        [i in _PM.ids(pm, nw, :PV)], base_name="$(nw)_crd_pv",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :PV, i), "crd_pv_start")
+    )
+    # if bounded
+    #     for (i, PV) in _PM.ref(pm, nw, :PV)
+    #         JuMP.set_lower_bound(crd_pv[i], 0)
+    #     end
+    # end
+    
+    report && _PM.sol_component_value(pm, nw, :PV, :crd_pv, _PM.ids(pm, nw, :PV), crd_pv)
+end
+
+
+"variable: `cid[j]` for `j` in `load`"
+function variable_PV_current_imaginary(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+    cid_pv = _PM.var(pm, nw)[:cid_pv] = JuMP.@variable(pm.model,
+        [i in _PM.ids(pm, nw, :PV)], base_name="$(nw)_cid_pv",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :PV, i), "cid_pv_start")
+    )
+    # if bounded
+    #     for (i, PV) in _PM.ref(pm, nw, :PV)
+    #         JuMP.set_lower_bound(cid_pv[i], 0)
+    #     end
+    # end
+
+    report && _PM.sol_component_value(pm, nw, :PV, :cid_pv, _PM.ids(pm, nw, :PV), cid_pv)
+end
+
+# PV size
+"variable: `p_size` for `j` in `load`"
+function variable_PV_size(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+    p_size = _PM.var(pm, nw)[:p_size] = JuMP.@variable(pm.model,
+        [i in _PM.ids(pm, nw, :PV)], base_name="$(nw)_p_size",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :PV, i), "p_size_start", 1)
+    )
+    
+    if bounded
+        for (i, PV) in _PM.ref(pm, nw, :PV)
+            if haskey(PV, "p_max") & haskey(PV,"p_min")
+                print(PV)
+                JuMP.set_lower_bound(p_size[i], PV["p_min"])
+                JuMP.set_upper_bound(p_size[i], PV["p_max"]) #2*PV["conn_cap_kW"])
+            else
+                JuMP.set_lower_bound(p_size[i], 0.1)
+                JuMP.set_upper_bound(p_size[i], 10) #2*PV["conn_cap_kW"])
+            end
+        end
+    end
+    report && _PM.sol_component_value(pm, nw, :PV, :p_size, _PM.ids(pm, nw, :PV), p_size)
+end
+
+function variable_PV_size_imaginary(pm::AbstractPowerModel; nw::Int=nw_id_default, bounded::Bool=true, report::Bool=true)
+    q_size = _PM.var(pm, nw)[:q_size] = JuMP.@variable(pm.model,
+        [i in _PM.ids(pm, nw, :PV)], base_name="$(nw)_q_size",
+        start = _PM.comp_start_value(_PM.ref(pm, nw, :PV, i), "q_size_start")
+    )
+    
+    if bounded
+        for (i, PV) in _PM.ref(pm, nw, :PV)
+            if haskey(PV, "p_max") & haskey(PV,"p_min")
+                JuMP.set_lower_bound(q_size[i], -0.2*PV["p_max"])
+                JuMP.set_upper_bound(q_size[i], 0.2*PV["p_max"]) #2*PV["conn_cap_kW"])
+            else
+
+                #### Negatif bound verince sifira esitliyor kendini.
+
+                JuMP.set_lower_bound(q_size[i], -1) 
+                JuMP.set_upper_bound(q_size[i], 1) #2*PV["conn_cap_kW"])
+            end
+        end
+    end
+    report && _PM.sol_component_value(pm, nw, :PV, :q_size, _PM.ids(pm, nw, :PV), q_size)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

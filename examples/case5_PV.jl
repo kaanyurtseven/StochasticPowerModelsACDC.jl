@@ -22,6 +22,10 @@ ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>5,
 
 # input
 deg  = 2
+obj = Dict()
+status = Dict()
+#for p_size = 1:5
+p_size = 50
 
 case = "case5_acdc_SPMACDC.m"
 
@@ -31,7 +35,7 @@ case = "case5_acdc_SPMACDC.m"
 
 #case = "case67_acdc_scopf_SPMACDC.m"
 
-#case = "case67_AC_SPMACDC.m"
+#case = "case67_ACDC_SPMACDC.m"
 
 
 file  = joinpath(BASE_DIR, "test/data/matpower", case)
@@ -44,7 +48,13 @@ file  = joinpath(BASE_DIR, "test/data/matpower", case)
 # s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
 # result_acdc = _PMACDC.run_acdcopf_iv(file, _PM.IVRPowerModel, ipopt_solver; setting = s)
 
-result_spmacdc = solve_sopf_acdc_iv(file, _PM.IVRPowerModel, ipopt_solver, deg=deg);
+result_spmacdc = solve_sopf_acdc_PV(file, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
+
+# obj[p_size] = result_spmacdc["objective"] 
+# status[p_size] = result_spmacdc["primal_status"]
+# end
+
+# plot(obj)
 
 # println("\n\n>>> OPF Results >>>")
 # println(result_opf["primal_status"])
@@ -70,9 +80,61 @@ print("Objective: ")
 print(result_spmacdc["objective"])
 
 
+idx = 1;
+nw_idx = 1;
+
+# result_acdc["solution"]["gen"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["gen"]["$idx"]
+
+# result_acdc["solution"]["bus"]["$idx"]["vr"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["bus"]["$idx"]["vr"]
+
+# result_acdc["solution"]["branch"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["branch"]["$idx"]
+
+# result_acdc["solution"]["bus"]["$idx"]["vi"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["bus"]["$idx"]["vi"]
+
+# result_acdc["solution"]["busdc"]["$idx"]["vm"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["busdc"]["$idx"]["vm"]
+
+# result_acdc["solution"]["branchdc"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["branchdc"]["$idx"]
+
+result_spmacdc["solution"]["nw"]["$nw_idx"]["PV"]["$idx"]
 
 
 
+q_sample1 = sample(result_spmacdc, "PV", 1, "cid_pv"; sample_size=1000)
+q_sample2 = sample(result_spmacdc, "PV", 1, "crd_pv"; sample_size=1000)
+
+
+dummy["solution"]["nw"]["1"]["PV"]["1"] = sdata["nw"]["1"]["PV"]["1"]
+q_sample = sample(sdata, "PV", 1, "cid_pv"; sample_size=1000)
+
+
+sample3 = _PCE.samplePCE(1000, [sdata["nw"]["$i"]["PV"]["4"]["pd"] for i=1:6], sdata["mop"])
+
+histogram(sample3)
+histogram(q_sample1)
+histogram!(q_sample2)
+
+vm_sample1 = sample(result_spmacdc, "bus", 2, "vr"; sample_size=1000)
+pg_sample1 = sample(result_spmacdc, "gen", 1, "pg"; sample_size=1000)
+crd_sample1 = sample(result_spmacdc, "branch", 2, "cr_fr"; sample_size=1000)
+crd_sample2 = sample(result_spmacdc, "PV", 4, "crd_pv"; sample_size=1000)
+
+
+histogram(vm_sample1)
+histogram(crd_sample1)
+histogram(crd_sample2)
+histogram(pg_sample1)
 
 #=
 

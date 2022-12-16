@@ -2,10 +2,12 @@
 function mpc = case5_acdc()
 mpc.version = '2';
 
-%column_names% pa dst pb 
+%% stochastic data
+%column_names%  dst         pa      pb
 mpc.sdata = [
-	0.0	'Normal'	0.0
-	2.0 'Beta' 		5.0
+                'Normal'    0.0     0.0;				
+                'Normal'	0.0		0.0;
+                'Beta'		5.0		2.0;
 ];
 
 %%-----  Power Flow Data  -----%%
@@ -14,10 +16,10 @@ mpc.baseMVA = 100;
 %% bus data
 %    bus_i    type    Pd    Qd    Gs    Bs    area    Vm    Va    baseKV    zone    Vmax    Vmin
 mpc.bus = [
-	1	3	0.0		0.0		0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9			
+	1	3	0.0	0.0	0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9				
 	2	2	20.0	10.0	0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9				
 	3	1	45.0	15.0	0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9				
-	4	1	40.0	5.0		0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9				
+	4	1	40.0	5.0	0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9				
 	5	1	60.0	10.0	0.0	0.0	1	1.0	0.0	345.0	1	1.1	0.9				
 ];
 
@@ -45,19 +47,17 @@ mpc.branch = [
 %    1    startup    shutdown    n    x1    y1    ...    xn    yn
 %    2    startup    shutdown    n    c(n-1)    ...    c0
 mpc.gencost = [
-	%2	0.0	0.0	2	1.0	0.0
-	%2	0.0	0.0	2	2.0	0.0
-	2	 0.0	 0.0	 3	   0.000000	  14.707625	   0.000000; % COW
-	2	 0.0	 0.0	 3	   0.000000	  24.804734	   0.000000; % COW	
+	2	0.0	0.0	2	24.804734	0.0
+	2	0.0	0.0	2	34.844643	0.0
 ];
 
 %column_names% μ dst_id λvmax σ λvmin 
 mpc.bus_data = {
-	0.0		1	1.65	0.0	1.65
-	20.0	1	1.65	2.0	1.65
+	0.0	0	1.65	0.0	1.65
+	20.0	0	1.65	0.0	1.65
 	45.0	1	1.65	4.5	1.65
-	40.0	1	1.65	4.0	1.65
-	60.0	1	1.65	6.0	1.65
+	40.0	2	1.65	6.0	1.65
+	60.0	0	1.65	0.0	1.65
 };
 
 %column_names% λqmax λpmax λpmin λqmin 
