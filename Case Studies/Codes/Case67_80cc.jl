@@ -28,12 +28,12 @@ ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0,
 deg  = 2
 
 #PV inputs
-pen_level_start = 0.5
+pen_level_start = 0.00
 pen_level_step = 0.01
-pen_level_end = 0.5
+pen_level_end = 2.00
 
 #Report decision
-Report = false
+Report = true
 
 #Necessary initializations
 obj_case1 = Dict()
@@ -49,12 +49,12 @@ global solve_case1 = true
 global solve_case2 = true
 
 #Case file and data reading
-case1 = "case67_AC_SPMACDC_95cc.m"
-file1  = joinpath(BASE_DIR, "test/data/matpower/Case Studies", case1)
+case1 = "case67_AC_SPMACDC_80cc.m"
+file1  = joinpath(BASE_DIR, "Case Studies/Data", case1)
 
-case2 = "case67_ACDC_SPMACDC_95cc.m"
+case2 = "case67_ACDC_SPMACDC_80cc.m"
 # case2 = "case5_ACDC_SPMACDC.m"
-file2  = joinpath(BASE_DIR, "test/data/matpower/Case Studies", case2)
+file2  = joinpath(BASE_DIR, "Case Studies/Data", case2)
 
 set = Dict("output" => Dict("duals" => false, "branch_flows" => true), "conv_losses_mp" => true)
 data = _PM.parse_file(file2)
