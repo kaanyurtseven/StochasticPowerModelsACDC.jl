@@ -5,7 +5,7 @@ function extend_matlab_file_AC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 0.83; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
+    λ_val = 1.61; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
 
     # general data
     baseMVA = data["baseMVA"]
@@ -67,19 +67,39 @@ function extend_matlab_file_AC(path::String)
 
     # end
 
+    # for (b,bus) in data["bus"]
+
+    #     if parse(Int,b) == 6
+            
+    #         bus["dst_id"]   = 1
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     elseif parse(Int,b) == 20
+            
+    #         bus["dst_id"]   = 2
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     else
+    #         bus["dst_id"]   = 0
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     end
+
+    # end
+
     for (b,bus) in data["bus"]
 
-        if parse(Int,b) == 6
+        if parse(Int,b) in 1:30
             
             bus["dst_id"]   = 1
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        
-        elseif parse(Int,b) == 20
-            
-            bus["dst_id"]   = 2
             bus["μ"]        = μ[parse(Int,b)]
             bus["σ"]        = σ[parse(Int,b)]
             bus["λvmin"]    = λ_val
@@ -121,14 +141,14 @@ function extend_matlab_file_AC(path::String)
     end
 
     # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC_80cc.m", data)
+    _PM.export_file(path[1:end-2] * "_SPMACDC_95cc_single.m", data)
 end
 
 function extend_matlab_file_ACDC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 0.83; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
+    λ_val = 1.61; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
 
     # general data
     baseMVA = data["baseMVA"]
@@ -190,19 +210,39 @@ function extend_matlab_file_ACDC(path::String)
 
     # end
 
+    # for (b,bus) in data["bus"]
+
+    #     if parse(Int,b) == 6
+            
+    #         bus["dst_id"]   = 1
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     elseif parse(Int,b) == 20
+            
+    #         bus["dst_id"]   = 2
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+        
+    #     else
+    #         bus["dst_id"]   = 0
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     end
+
+    # end
+
     for (b,bus) in data["bus"]
 
-        if parse(Int,b) == 6
+        if parse(Int,b) in 1:30
             
             bus["dst_id"]   = 1
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        
-        elseif parse(Int,b) == 20
-            
-            bus["dst_id"]   = 2
             bus["μ"]        = μ[parse(Int,b)]
             bus["σ"]        = σ[parse(Int,b)]
             bus["λvmin"]    = λ_val
@@ -261,7 +301,7 @@ function extend_matlab_file_ACDC(path::String)
     end
 
     # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC_80cc.m", data)
+    _PM.export_file(path[1:end-2] * "_SPMACDC_95cc_single.m", data)
 end
 
 function get_pu_bases(MVAbase, kVbase)

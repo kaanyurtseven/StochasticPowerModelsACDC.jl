@@ -33,7 +33,7 @@ pen_level_step = 0.01
 pen_level_end = 2.00
 
 #Report decision
-Report = false
+Report = true
 
 #Necessary initializations
 obj_case1 = Dict()
@@ -45,14 +45,14 @@ p_size_dict = Dict()
 global feas_ctr1 = 0
 global feas_ctr2 = 0
 
-global solve_case1 = false
-global solve_case2 = false
+global solve_case1 = true
+global solve_case2 = true
 
 #Case file and data reading
-case1 = "case67_AC_SPMACDC_85cc.m"
+case1 = "case67_AC_SPMACDC_95cc_single.m"
 file1  = joinpath(BASE_DIR, "Case Studies/Data", case1)
 
-case2 = "case67_ACDC_SPMACDC_85cc.m"
+case2 = "case67_ACDC_SPMACDC_95cc_single.m"
 # case2 = "case5_ACDC_SPMACDC.m"
 file2  = joinpath(BASE_DIR, "Case Studies/Data", case2)
 
