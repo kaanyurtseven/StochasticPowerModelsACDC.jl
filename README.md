@@ -16,7 +16,7 @@ The latest stable release of PowerModelACDC can be installed using the Julia pac
 ### Core Problem Specification
 * Stochastic Optimal Power Flow for AC and AC/DC grids
 
-## Core Network Formulation
+### Core Network Formulation
 The code currently supports only the IVR-formulated optimal power flow problem.
 
 ## Contributing
