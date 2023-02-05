@@ -1,11 +1,10 @@
 ################################################################################
-#  Copyright 2021, Tom Van Acker, Frederik Geth                                #
+# Copyright 2023, Kaan Yurtseven                                               #
 ################################################################################
-# StochasticPowerModels.jl                                                     #
-# An extention package of PowerModels.jl for Stochastic (Optimal) Power Flow   #
-# See http://github.com/timmyfaraday/StochasticPowerModels.jl                  #
-################################################################################
-# NOTE: dc lines are omitted from the current formulation                      #
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
 ################################################################################
 
 ""
@@ -27,8 +26,6 @@ function solve_sopf_acdc_iv(data::Dict, model_constructor, optimizer; deg::Int=1
     
     return result
 end
-
-
 
 ""
 function build_sopf_acdc_iv(pm::AbstractPowerModel)
@@ -73,13 +70,6 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
 
         for b in _PM.ids(pm, :branch, nw=n)
             _PM.constraint_voltage_drop(pm, b, nw=n)
-            # _PM.constraint_current_from(pm, b, nw=n)
-            # _PM.constraint_current_to(pm, b, nw=n)
-            # _PM.constraint_voltage_angle_difference(pm, b, nw=n)
-
-            # _PM.constraint_thermal_limit_from(pm, b, nw=n)
-            # _PM.constraint_thermal_limit_to(pm, b, nw=n)
-
             constraint_gp_branch_series_current_magnitude_squared(pm, b, nw=n)
         end
 

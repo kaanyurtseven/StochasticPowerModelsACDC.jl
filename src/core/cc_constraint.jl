@@ -1,4 +1,13 @@
-#Eq. (22)
+################################################################################
+# Copyright 2023, Kaan Yurtseven                                               #
+################################################################################
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
+################################################################################
+
+
 function constraint_cc_filter_voltage_squared(pm::AbstractACRModel, i, vmin, vmax, λmin, λmax, T2, mop)
     vk_s  = [_PM.var(pm, n, :vk_s, i) for n in sorted_nw_ids(pm)]
     
@@ -21,7 +30,7 @@ function constraint_cc_filter_voltage_squared(pm::AbstractACRModel, i, vmin, vma
     end
 end
 
-#Eq. (23)
+
 function constraint_cc_converter_voltage_squared(pm::AbstractACRModel, i, vmin, vmax, λmin, λmax, T2, mop)
     vc_s  = [_PM.var(pm, n, :vc_s, i) for n in sorted_nw_ids(pm)]
     

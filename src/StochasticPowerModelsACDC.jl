@@ -1,10 +1,10 @@
 ################################################################################
-#  Copyright 2020, Tom Van Acker                                               #
+# Copyright 2023, Kaan Yurtseven                                               #
 ################################################################################
-# StochasticPowerModels.jl                                                     #
-# An extention package of PowerModels(Distribution).jl for Stochastic (Optimal)#
-# Power Flow                                                                   #
-# See http://github.com/timmyfaraday/StochasticPowerModels.jl                  #
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
 ################################################################################
 
 module StochasticPowerModelsACDC
@@ -47,15 +47,12 @@ module StochasticPowerModelsACDC
 
     # include
     include("core/constraint.jl")
-    #include("core/gp_constraint_acdc.jl")
     include("core/gp_constraint.jl")
-    #include("core/cc_constraint_acdc.jl")
     include("core/cc_constraint.jl")
 
     include("core/constraint_template.jl")
     include("core/cc_constraint_template.jl")
     include("core/gp_constraint_template.jl")
-    #include("core/cc_gp_constraint_template_acdc.jl")
 
     include("core/objective.jl")
 
@@ -64,7 +61,6 @@ module StochasticPowerModelsACDC
 
     include("form/iv.jl")
 
-    include("prob/sopf_iv.jl")
     include("prob/sopf_acdc_iv.jl")
     include("prob/sopf_acdc_PV.jl")
 
@@ -74,14 +70,13 @@ module StochasticPowerModelsACDC
     # export
     export BASE_DIR
 
-    export solve_sopf_iv
     export solve_sopf_acdc_iv
     export solve_sopf_acdc_PV
 
     export build_stochastic_data
     export build_sopf_acdc_PV
     export build_stochastic_acdc_data
-    #export extend_matlab_file
+    
     export extend_matlab_file_AC
     export extend_matlab_file_ACDC
     export pce_coeff, sample, density, print_summary

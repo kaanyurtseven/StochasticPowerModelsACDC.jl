@@ -1,14 +1,12 @@
 ################################################################################
-#  Copyright 2021, Tom Van Acker                                               #
+# Copyright 2023, Kaan Yurtseven                                               #
 ################################################################################
-# StochasticPowerModels.jl                                                     #
-# An extention package of PowerModels.jl for Stochastic (Optimal) Power Flow   #
-# See http://github.com/timmyfaraday/StochasticPowerModels.jl                  #
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
 ################################################################################
 
-# general constraints
-## bus
-""
 function constraint_bus_voltage_ref(pm::AbstractACRModel, n::Int, i::Int)
 
     vr = _PM.var(pm, n, :vr, i)
@@ -103,37 +101,105 @@ function constraint_current_balance_dc(pm::_PM.AbstractIVRModel, n::Int, bus_arc
 end
    
 
-function constraint_gp_pv_power_real(pm::AbstractIVRModel, n::Int, i, p, pd, T2, T3, p_size; curt=0.0)
-        
-    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
-    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+function constraint_current_balance(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_gens, bus_loads, bus_gs, bus_bs)
+    vr = _PM.var(pm, n, :vr, i)
+    vi = _PM.var(pm, n, :vi, i)
 
-    crd_pv = Dict(nw => _PM.var(pm, nw, :crd_pv, p) for nw in _PM.nw_ids(pm))
-    cid_pv = Dict(nw => _PM.var(pm, nw, :cid_pv, p) for nw in _PM.nw_ids(pm))
+    cr = _PM.var(pm, n, :cr)
+    ci = _PM.var(pm, n, :ci)
 
-    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * pd * p_size *(1-curt)
+    crd = _PM.var(pm, n, :crd)
+    cid = _PM.var(pm, n, :cid)
+    crg = _PM.var(pm, n, :crg)
+    cig = _PM.var(pm, n, :cig)
+
+    JuMP.@constraint(pm.model,  sum(cr[a] for a in bus_arcs)
                                 ==
-                                sum(T3.get([n1-1,n2-1,n-1]) *
-                                    (vr[n1] * crd_pv[n2] + vi[n1] * cid_pv[n2])
-                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
-                    )
-        
+                                sum(crg[g] for g in bus_gens)
+                                - sum(crd[d] for d in bus_loads)
+                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
+                                )
+    JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs)
+                                ==
+                                sum(cig[g] for g in bus_gens)
+                                - sum(cid[d] for d in bus_loads)
+                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
+                                )
 end
 
-function constraint_gp_pv_power_imaginary(pm::AbstractIVRModel, n::Int, i, p, qd, T2, T3, q_size; curt=0.0)
+function constraint_current_balance_ac(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs)
+    vr = _PM.var(pm, n, :vr, i)
+    vi = _PM.var(pm, n, :vi, i)
+
+    cr = _PM.var(pm, n, :cr)
+    ci = _PM.var(pm, n, :ci)
+    cidc = _PM.var(pm, n, :cidc)
+
+    iik_r = _PM.var(pm, n, :iik_r)
+    iik_i = _PM.var(pm, n, :iik_i)
+
+    crd = _PM.var(pm, n, :crd)
+    cid = _PM.var(pm, n, :cid)
+    crg = _PM.var(pm, n, :crg)
+    cig = _PM.var(pm, n, :cig)
+
+    JuMP.@constraint(pm.model,  sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
+                                ==
+                                sum(crg[g] for g in bus_gens)
+                                - sum(crd[d] for d in bus_loads)
+                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
+                                )
     
-    vr  = Dict(n => _PM.var(pm, n, :vr, i) for n in _PM.nw_ids(pm))
-    vi  = Dict(n => _PM.var(pm, n, :vi, i) for n in _PM.nw_ids(pm))
-
-    crd_pv = Dict(n => _PM.var(pm, n, :crd_pv, p) for n in _PM.nw_ids(pm))
-    cid_pv = Dict(n => _PM.var(pm, n, :cid_pv, p) for n in _PM.nw_ids(pm))
-
-    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * qd * q_size * (1-curt)
+    JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
+                                + sum(cidc[d] for d in bus_arcs_dc)
                                 ==
-                                sum(T3.get([n1-1,n2-1,n-1]) *
-                                    (vi[n1] * crd_pv[n2] - vr[n1] * cid_pv[n2])
-                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
-                    )
+                                sum(cig[g] for g in bus_gens)
+                                - sum(cid[d] for d in bus_loads)
+                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
+                                )
+
 end
+
+
+# current balance with PV
+""
+function constraint_current_balance_with_PV(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs, bus_PV)
+    vr = _PM.var(pm, n, :vr, i)
+    vi = _PM.var(pm, n, :vi, i)
+
+    cr = _PM.var(pm, n, :cr)
+    ci = _PM.var(pm, n, :ci)
+    cidc = _PM.var(pm, n, :cidc)
+
+    iik_r = _PM.var(pm, n, :iik_r)
+    iik_i = _PM.var(pm, n, :iik_i)
+
+    crd = _PM.var(pm, n, :crd)
+    cid = _PM.var(pm, n, :cid)
+    crg = _PM.var(pm, n, :crg)
+    cig = _PM.var(pm, n, :cig)
+
+    crd_pv = _PM.var(pm, n, :crd_pv)
+    cid_pv = _PM.var(pm, n, :cid_pv)
+    #p_size = _PM.var(pm, 1, :p_size)
+
+    JuMP.@constraint(pm.model,  sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
+                                ==
+                                sum(crg[g] for g in bus_gens)
+                                - sum(crd[d] for d in bus_loads)
+                                + sum(crd_pv[p] for p in bus_PV)  #*p_size[p]
+                                - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
+                                )
+    
+    JuMP.@constraint(pm.model,  sum(ci[a] for a in bus_arcs) + sum(iik_i[c] for c in bus_convs_ac)
+                                + sum(cidc[d] for d in bus_arcs_dc)
+                                ==
+                                sum(cig[g] for g in bus_gens)
+                                - sum(cid[d] for d in bus_loads)
+                                + sum(cid_pv[p] for p in bus_PV) #*p_size[p]
+                                - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
+                                )
+end
+
 
 

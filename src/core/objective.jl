@@ -1,9 +1,10 @@
 ################################################################################
-#  Copyright 2021, Tom Van Acker                                               #
+# Copyright 2023, Kaan Yurtseven                                               #
 ################################################################################
-# StochasticPowerModels.jl                                                     #
-# An extention package of PowerModels.jl for Stochastic (Optimal) Power Flow   #
-# See http://github.com/timmyfaraday/StochasticPowerModels.jl                  #
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
 ################################################################################
 
 "expected cost of active power generation"
@@ -70,32 +71,3 @@ function objective_min_expected_generation_cost_PV(pm::AbstractPowerModel; kwarg
     )
 end
 
-
-"expected max PV generation"
-function objective_max_PV(pm::AbstractPowerModel; kwargs...)
-    p_size = Dict()
-
-
-    for (p, PV) in _PM.ref(pm, :PV, nw=1)
-        p_size[p] = Dict(nw => _PM.var(pm, nw, :p_size, p) for nw in [1])
-    end
-
-    return JuMP.@objective(pm.model, Max,
-            sum(p_size[p][1] for p in _PM.ids(pm, :PV, nw=1))
-    )
-end
-
-
-function objective_max_PV_imaginary(pm::AbstractPowerModel; kwargs...)
-    p_size = Dict()
-    q_size = Dict()
-
-    for (p, PV) in _PM.ref(pm, :PV, nw=1)
-        p_size[p] = Dict(nw => _PM.var(pm, nw, :p_size, p) for nw in [1])
-        q_size[p] = Dict(nw => _PM.var(pm, nw, :q_size, p) for nw in [1])
-    end
-
-    return JuMP.@objective(pm.model, Max,
-            sum(p_size[p][1]^2 + q_size[p][1]^2 for p in _PM.ids(pm, :PV, nw=1))
-    )
-end

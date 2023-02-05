@@ -22,18 +22,18 @@ Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
 #Solver inputs
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>5000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>2, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
 
 #gPC degree input
 deg  = 2
 
 #PV inputs
-pen_level_start = 0.00
+pen_level_start = 0.40
 pen_level_step = 0.01
-pen_level_end = 2.00
+pen_level_end = 0.40
 
 #Report decision
-Report = true
+Report = false
 
 #Necessary initializations
 obj_case1 = Dict()
@@ -45,16 +45,15 @@ p_size_dict = Dict()
 global feas_ctr1 = 0
 global feas_ctr2 = 0
 
-global solve_case1 = true
+global solve_case1 = true 
 global solve_case2 = true
 
 #Case file and data reading
-case1 = "case67_AC_SPMACDC_80cc.m"
-file1  = joinpath(BASE_DIR, "Case Studies/Data", case1)
+case1 = "case67_AC_SPMACDC_95cc.m"
+file1  = joinpath(BASE_DIR, "test/data/matpower", case1)
 
-case2 = "case67_ACDC_SPMACDC_80cc.m"
-# case2 = "case5_ACDC_SPMACDC.m"
-file2  = joinpath(BASE_DIR, "Case Studies/Data", case2)
+case2 = "case67_ACDC_SPMACDC_95cc.m"
+file2  = joinpath(BASE_DIR, "test/data/matpower", case2)
 
 set = Dict("output" => Dict("duals" => false, "branch_flows" => true), "conv_losses_mp" => true)
 data = _PM.parse_file(file2)
@@ -83,7 +82,7 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
                 global feas_ctr1 = 0
             end
 
-            println("   Case 1 solution progress: Solved!")
+            println("   Case 1 solution progress: Solved! (", string(result_spmacdc_case1["primal_status"]), ")")
 
             if feas_ctr1 >= 2
                 global solve_case1 = false
@@ -106,7 +105,7 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
                 global feas_ctr2 = 0
             end
 
-            println("   Case 2 solution progress: Solved!")
+            println("   Case 2 solution progress: Solved! (", string(result_spmacdc_case2["primal_status"]), ")")
 
             if feas_ctr2 >= 2
                 println("   Case 2 reached infeasibility on penetration level of $pen_level.")
@@ -133,13 +132,13 @@ end
 
 # Reporting
 if Report
-    file_name1 = "Results\\gPC Results - $case1.xlsx"
+    file_name1 = "gPC Results - $case1.xlsx"
     fid    = XLSX.openxlsx(file_name1, mode="w")
     header = ["Penetration Level";"Objective Value";"Status"]
     data   = [[collect(keys(obj_case1))];[collect(values(obj_case1))];[collect(values(stat_case1))] ]
     XLSX.writetable(file_name1, data,header)
 
-    file_name2 = "Results\\gPC Results - $case2.xlsx"
+    file_name2 = "gPC Results - $case2.xlsx"
     fid    = XLSX.openxlsx(file_name2, mode="w")
     header = ["Penetration Level";"Objective Value";"Status"]
     data   = [[collect(keys(obj_case2))];[collect(values(obj_case2))];[collect(values(stat_case2))] ]

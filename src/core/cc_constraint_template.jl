@@ -1,5 +1,11 @@
-
-
+################################################################################
+# Copyright 2023, Kaan Yurtseven                                               #
+################################################################################
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
+################################################################################
 
 function constraint_cc_filter_voltage_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
     vmin = _PM.ref(pm, nw, :convdc, i, "Vmmin")

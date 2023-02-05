@@ -1,3 +1,12 @@
+################################################################################
+# Copyright 2023, Kaan Yurtseven                                               #
+################################################################################
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
+################################################################################
+
 function constraint_gp_filter_voltage_squared(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
     T2  = pm.data["T2"]
     T3  = pm.data["T3"]
@@ -184,4 +193,24 @@ function constraint_gp_load_power(pm::AbstractPowerModel, l::Int; nw::Int=nw_id_
 
     constraint_gp_load_power_real(pm, nw, i, l, pd, T2, T3)
     constraint_gp_load_power_imaginary(pm, nw, i, l, qd, T2, T3)
+end
+
+function constraint_gp_pv_power(pm::AbstractPowerModel, p::Int; nw::Int=nw_id_default)
+    i   = _PM.ref(pm, nw, :PV, p, "load_bus") 
+
+    pd  = _PM.ref(pm, nw, :PV, p, "pd")
+    qd  = _PM.ref(pm, nw, :PV, p, "qd")
+
+    # p_size= _PM.var(pm, 1, :p_size, p)
+    # q_size= _PM.var(pm, 1, :q_size, p)
+
+    p_size = _PM.ref(pm, nw, :PV, p, "p_size")
+    q_size = _PM.ref(pm, nw, :PV, p, "q_size")
+
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+    # c = pm.data["curt"]
+
+    constraint_gp_pv_power_real(pm, nw, i, p, pd, T2, T3, p_size)
+    constraint_gp_pv_power_imaginary(pm, nw, i, p, qd, T2, T3, q_size)
 end

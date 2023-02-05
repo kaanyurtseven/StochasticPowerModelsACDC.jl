@@ -1,5 +1,13 @@
+################################################################################
+# Copyright 2023, Kaan Yurtseven                                               #
+################################################################################
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
+################################################################################
+
 function variable_dc_converter(pm::_PM.AbstractIVRModel; nw::Int=nw_id_default, bounded::Bool=true,report::Bool=false, kwargs...)
-    
     
     _PMACDC.variable_filter_voltage_real(pm, nw=nw, bounded=bounded, kwargs...)
     _PMACDC.variable_filter_voltage_imaginary(pm, nw=nw, bounded=bounded, kwargs...)

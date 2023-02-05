@@ -1,14 +1,12 @@
 ################################################################################
-#  Copyright 2021, Tom Van Acker                                               #
+# Copyright 2023, Kaan Yurtseven                                               #
 ################################################################################
-# StochasticPowerModels.jl                                                     #
-# An extention package of PowerModels.jl for Stochastic (Optimal) Power Flow   #
-# See http://github.com/timmyfaraday/StochasticPowerModels.jl                  #
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
 ################################################################################
 
-# general constraints
-## reference
-""
 function constraint_bus_voltage_ref(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
     constraint_bus_voltage_ref(pm, nw, i)
 end
@@ -130,7 +128,7 @@ function constraint_current_balance_with_PV(pm::AbstractPowerModel, i::Int; nw::
     bus_loads = _PM.ref(pm, nw, :bus_loads, i)
     bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
 
-    bus_PV = _PM.ref(pm, nw, :bus_loads, i)  #to ask Tom to get :PV it works now as all load has PV
+    bus_PV = _PM.ref(pm, nw, :bus_loads, i) 
 
     bus_gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bus_bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
@@ -139,22 +137,3 @@ function constraint_current_balance_with_PV(pm::AbstractPowerModel, i::Int; nw::
 
 end
 
-function constraint_gp_pv_power(pm::AbstractPowerModel, p::Int; nw::Int=nw_id_default)
-    i   = _PM.ref(pm, nw, :PV, p, "load_bus") 
-
-    pd  = _PM.ref(pm, nw, :PV, p, "pd")
-    qd  = _PM.ref(pm, nw, :PV, p, "qd")
-
-    # p_size= _PM.var(pm, 1, :p_size, p)
-    # q_size= _PM.var(pm, 1, :q_size, p)
-
-    p_size = _PM.ref(pm, nw, :PV, p, "p_size")
-    q_size = _PM.ref(pm, nw, :PV, p, "q_size")
-
-    T2  = pm.data["T2"]
-    T3  = pm.data["T3"]
-    # c = pm.data["curt"]
-
-    constraint_gp_pv_power_real(pm, nw, i, p, pd, T2, T3, p_size)
-    constraint_gp_pv_power_imaginary(pm, nw, i, p, qd, T2, T3, q_size)
-end

@@ -1,3 +1,11 @@
+################################################################################
+# Copyright 2023, Kaan Yurtseven                                               #
+################################################################################
+# StochasticPowerModelsACDC.jl                                                 #
+# An extention package of PowerModels.jl and StochasticPowerModels.jl for      #
+#                                 Stochastic Optimal Power Flow in AC/DC grids #
+# See https://github.com/kaanyurtseven/StochasticPowerModelsACDC               #
+################################################################################
 
 function constraint_gp_ohms_dc_branch(pm::AbstractACRModel, n::Int, i, T2, T3, f_bus, t_bus, f_idx, t_idx, r, p)
 
@@ -242,6 +250,120 @@ function constraint_gp_bus_voltage_magnitude_squared(pm::AbstractACRModel, n::In
                                 ==
                                 sum(T3.get([n1-1,n2-1,n-1]) * 
                                     (vr[n1] * vr[n2] + vi[n1] * vi[n2]) 
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
+function constraint_gp_pv_power_real(pm::AbstractIVRModel, n::Int, i, p, pd, T2, T3, p_size; curt=0.0)
+        
+    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
+    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+
+    crd_pv = Dict(nw => _PM.var(pm, nw, :crd_pv, p) for nw in _PM.nw_ids(pm))
+    cid_pv = Dict(nw => _PM.var(pm, nw, :cid_pv, p) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * pd * p_size *(1-curt)
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vr[n1] * crd_pv[n2] + vi[n1] * cid_pv[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+        
+end
+
+function constraint_gp_pv_power_imaginary(pm::AbstractIVRModel, n::Int, i, p, qd, T2, T3, q_size; curt=0.0)
+    
+    vr  = Dict(n => _PM.var(pm, n, :vr, i) for n in _PM.nw_ids(pm))
+    vi  = Dict(n => _PM.var(pm, n, :vi, i) for n in _PM.nw_ids(pm))
+
+    crd_pv = Dict(n => _PM.var(pm, n, :crd_pv, p) for n in _PM.nw_ids(pm))
+    cid_pv = Dict(n => _PM.var(pm, n, :cid_pv, p) for n in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * qd * q_size * (1-curt)
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vi[n1] * crd_pv[n2] - vr[n1] * cid_pv[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
+function constraint_gp_branch_series_current_magnitude_squared(pm::AbstractIVRModel, n::Int, i, T2, T3)
+    cmss  = _PM.var(pm, n, :cmss, i)
+    csr = Dict(nw => _PM.var(pm, nw, :csr, i) for nw in _PM.nw_ids(pm))
+    csi = Dict(nw => _PM.var(pm, nw, :csi, i) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * cmss
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) * 
+                                    (csr[n1] * csr[n2] + csi[n1] * csi[n2]) 
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
+## generator
+""
+function constraint_gp_gen_power_real(pm::AbstractIVRModel, n::Int, i, g, T2, T3)
+    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
+    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+    
+    crg = Dict(nw => _PM.var(pm, nw, :crg, g) for nw in _PM.nw_ids(pm))
+    cig = Dict(nw => _PM.var(pm, nw, :cig, g) for nw in _PM.nw_ids(pm))
+
+    pg  = _PM.var(pm, n, :pg, g)
+    
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * pg
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) * 
+                                    (vr[n1] * crg[n2] + vi[n1] * cig[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+""
+function constraint_gp_gen_power_imaginary(pm::AbstractIVRModel, n::Int, i, g, T2, T3)
+    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
+    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+    
+    crg = Dict(nw => _PM.var(pm, nw, :crg, g) for nw in _PM.nw_ids(pm))
+    cig = Dict(nw => _PM.var(pm, nw, :cig, g) for nw in _PM.nw_ids(pm))
+
+    qg  = _PM.var(pm, n, :qg, g)
+    
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * qg
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vi[n1] * crg[n2] - vr[n1] * cig[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+
+## load
+""
+function constraint_gp_load_power_real(pm::AbstractIVRModel, n::Int, i, l, pd, T2, T3)
+    vr  = Dict(nw => _PM.var(pm, nw, :vr, i) for nw in _PM.nw_ids(pm))
+    vi  = Dict(nw => _PM.var(pm, nw, :vi, i) for nw in _PM.nw_ids(pm))
+
+    crd = Dict(nw => _PM.var(pm, nw, :crd, l) for nw in _PM.nw_ids(pm))
+    cid = Dict(nw => _PM.var(pm, nw, :cid, l) for nw in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * pd
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vr[n1] * crd[n2] + vi[n1] * cid[n2])
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+end
+""
+function constraint_gp_load_power_imaginary(pm::AbstractIVRModel, n::Int, i, l, qd, T2, T3)
+    vr  = Dict(n => _PM.var(pm, n, :vr, i) for n in _PM.nw_ids(pm))
+    vi  = Dict(n => _PM.var(pm, n, :vi, i) for n in _PM.nw_ids(pm))
+
+    crd = Dict(n => _PM.var(pm, n, :crd, l) for n in _PM.nw_ids(pm))
+    cid = Dict(n => _PM.var(pm, n, :cid, l) for n in _PM.nw_ids(pm))
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * qd
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) *
+                                    (vi[n1] * crd[n2] - vr[n1] * cid[n2])
                                     for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
                     )
 end
