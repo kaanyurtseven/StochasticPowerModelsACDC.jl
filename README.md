@@ -28,6 +28,10 @@ We welcome contributions from the community. If you would like to contribute to 
 The primary developer is Kaan Yurtseven ([@kaanyurtseven](https://github.com/kaanyurtseven)), with support from the following contributor(s):
 * Arpan Koirala ([@arpkoirala](https://github.com/arpkoirala)), KU Leuven
 
+## Citing StochasticPowerModelsACDC
+
+If you find StochasticPowerModelsACDC useful in your work, we kindly request that you cite the following publication:
+
 ## License
 
 This code is provided under a BSD license.
