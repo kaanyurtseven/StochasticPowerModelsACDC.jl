@@ -22,7 +22,7 @@ Memento.setlevel!(Memento.getlogger(PowerModelsACDC), "error")
 Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 
 #Solver inputs
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>2, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_iter"=>3000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
 
 #gPC degree input
 deg  = 2
