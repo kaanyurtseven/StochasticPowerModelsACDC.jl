@@ -32,6 +32,8 @@ The primary developer is Kaan Yurtseven ([@kaanyurtseven](https://github.com/kaa
 
 If you find StochasticPowerModelsACDC useful in your work, we kindly request that you cite the following publication:
 
+Yurtseven, Kaan; Koirala, Arpan; Ergun, Hakan; Van Hertem, Dirk (2023): Stochastic Optimal Power Flow For Hybrid ACDC Grids Using General Polynomial Chaos. TechRxiv. Preprint. https://doi.org/10.36227/techrxiv.22606840.v1
+
 ## License
 
 This code is provided under a BSD license.
