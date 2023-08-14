@@ -100,12 +100,12 @@ function build_sopf_acdc(pm::AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, :convdc, nw=n)
-            constraint_gp_filter_voltage_squared(pm, i, nw=n)
-            constraint_gp_converter_voltage_squared(pm, i, nw=n)
-            constraint_gp_transformer_current_from_squared(pm, i, nw=n)
-            constraint_gp_transformer_current_to_squared(pm, i, nw=n)
-            constraint_gp_reactor_current_from_squared(pm, i, nw=n)
-            constraint_gp_reactor_current_to_squared(pm, i, nw=n)
+            # constraint_gp_filter_voltage_squared(pm, i, nw=n)
+            # constraint_gp_converter_voltage_squared(pm, i, nw=n)
+            # constraint_gp_transformer_current_from_squared(pm, i, nw=n)
+            # constraint_gp_transformer_current_to_squared(pm, i, nw=n)
+            # constraint_gp_reactor_current_from_squared(pm, i, nw=n)
+            # constraint_gp_reactor_current_to_squared(pm, i, nw=n)
 
             constraint_gp_iconv_lin_squared_1(pm, i, nw=n)
             constraint_gp_iconv_lin_squared_2(pm, i, nw=n)
@@ -149,7 +149,7 @@ function build_sopf_acdc(pm::AbstractPowerModel)
 
     for i in _PM.ids(pm, :convdc, nw=1)
 
-        constraint_cc_iconv_lin_squared(pm, i, nw=1) #Checked
+        # constraint_cc_iconv_lin_squared(pm, i, nw=1) #Checked
         constraint_cc_iconv_lin(pm, i, nw=1) #Checked
 
         constraint_cc_conv_ac_power(pm, i, nw=1) #Checked
@@ -157,12 +157,12 @@ function build_sopf_acdc(pm::AbstractPowerModel)
         constraint_cc_converter_dc_current(pm, i, nw=1) #Checked
         
         
-        constraint_cc_filter_voltage_squared(pm, i, nw=1) #Checked
-        constraint_cc_converter_voltage_squared(pm, i, nw=1) #Checked
-        constraint_cc_transformer_current_from_squared(pm, i, nw=1) #Checked
-        constraint_cc_transformer_current_to_squared(pm, i, nw=1) #Checked
-        constraint_cc_reactor_current_from_squared(pm, i, nw=1) #Checked
-        constraint_cc_reactor_current_to_squared(pm, i, nw=1) #Checked
+        # constraint_cc_filter_voltage_squared(pm, i, nw=1) #Checked
+        # constraint_cc_converter_voltage_squared(pm, i, nw=1) #Checked
+        # constraint_cc_transformer_current_from_squared(pm, i, nw=1) #Checked
+        # constraint_cc_transformer_current_to_squared(pm, i, nw=1) #Checked
+        # constraint_cc_reactor_current_from_squared(pm, i, nw=1) #Checked
+        # constraint_cc_reactor_current_to_squared(pm, i, nw=1) #Checked
 
     end
 
