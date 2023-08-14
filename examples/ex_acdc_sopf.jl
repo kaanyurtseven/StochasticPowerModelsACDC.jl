@@ -28,9 +28,9 @@ ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0,
 deg  = 2
 
 #RES inputs
-pen_level_start = 0.40
+pen_level_start = 0.4
 pen_level_step = 0.01
-pen_level_end = 0.40
+pen_level_end = 0.4
 
 #Report decision
 Report = false
