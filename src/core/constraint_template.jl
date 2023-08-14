@@ -112,7 +112,7 @@ end
 
 # current balance with PV
 ""
-function constraint_current_balance_with_PV(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
+function constraint_current_balance_with_RES(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
    if !haskey(_PM.con(pm, nw), :kcl_cr)
         _PM.con(pm, nw)[:kcl_cr] = Dict{Int,JuMP.ConstraintRef}()
     end
@@ -128,12 +128,12 @@ function constraint_current_balance_with_PV(pm::AbstractPowerModel, i::Int; nw::
     bus_loads = _PM.ref(pm, nw, :bus_loads, i)
     bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
 
-    bus_PV = _PM.ref(pm, nw, :bus_loads, i) 
+    bus_RES = _PM.ref(pm, nw, :bus_loads, i) 
 
     bus_gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bus_bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)
 
-    constraint_current_balance_with_PV(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs, bus_PV)
+    constraint_current_balance_with_RES(pm, nw, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs, bus_RES)
 
 end
 

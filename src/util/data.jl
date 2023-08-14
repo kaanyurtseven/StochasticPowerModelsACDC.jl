@@ -582,7 +582,6 @@ function convert_matpowerdcline_to_branchdc_multinetwork!(data)
     end
 end
 
-
 function fix_data!(data)
 
 

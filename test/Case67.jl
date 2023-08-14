@@ -27,7 +27,7 @@ ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0,
 #gPC degree input
 deg  = 2
 
-#PV inputs
+#RES inputs
 pen_level_start = 0.40
 pen_level_step = 0.01
 pen_level_end = 0.40
@@ -45,14 +45,15 @@ p_size_dict = Dict()
 global feas_ctr1 = 0
 global feas_ctr2 = 0
 
-global solve_case1 = true 
+global solve_case1 = false 
 global solve_case2 = true
 
 #Case file and data reading
 case1 = "case67_AC_SPMACDC_95cc.m"
 file1  = joinpath(BASE_DIR, "test/data/matpower", case1)
 
-case2 = "case67_ACDC_SPMACDC_95cc.m"
+# case2 = "case67_ACDC_SPMACDC_95cc.m"
+case2 = "case5_ACDC_mod_SPMACDC_95cc.m"
 file2  = joinpath(BASE_DIR, "test/data/matpower", case2)
 
 set = Dict("output" => Dict("duals" => false, "branch_flows" => true), "conv_losses_mp" => true)
@@ -93,7 +94,7 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
 
         if solve_case2
             println("   Case 2 solution progress: Solving...")
-            global result_spmacdc_case2 = solve_sopf_acdc_PV(file2, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
+            global result_spmacdc_case2 = solve_sopf_acdc(file2, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
             
             #Store necessary values for reporting
             obj_case2[pen_level] = result_spmacdc_case2["objective"] 

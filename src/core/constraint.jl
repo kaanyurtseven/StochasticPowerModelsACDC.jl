@@ -163,7 +163,7 @@ end
 
 # current balance with PV
 ""
-function constraint_current_balance_with_PV(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs, bus_PV)
+function constraint_current_balance_with_RES(pm::AbstractIVRModel, n::Int, i, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_gs, bus_bs, bus_RES)
     vr = _PM.var(pm, n, :vr, i)
     vi = _PM.var(pm, n, :vi, i)
 
@@ -179,15 +179,15 @@ function constraint_current_balance_with_PV(pm::AbstractIVRModel, n::Int, i, bus
     crg = _PM.var(pm, n, :crg)
     cig = _PM.var(pm, n, :cig)
 
-    crd_pv = _PM.var(pm, n, :crd_pv)
-    cid_pv = _PM.var(pm, n, :cid_pv)
+    crd_RES = _PM.var(pm, n, :crd_RES)
+    cid_RES = _PM.var(pm, n, :cid_RES)
     #p_size = _PM.var(pm, 1, :p_size)
 
     JuMP.@constraint(pm.model,  sum(cr[a] for a in bus_arcs) + sum(iik_r[c] for c in bus_convs_ac)
                                 ==
                                 sum(crg[g] for g in bus_gens)
                                 - sum(crd[d] for d in bus_loads)
-                                + sum(crd_pv[p] for p in bus_PV)  #*p_size[p]
+                                + sum(crd_RES[p] for p in bus_RES)  #*p_size[p]
                                 - sum(gs for gs in values(bus_gs))*vr + sum(bs for bs in values(bus_bs))*vi
                                 )
     
@@ -196,7 +196,7 @@ function constraint_current_balance_with_PV(pm::AbstractIVRModel, n::Int, i, bus
                                 ==
                                 sum(cig[g] for g in bus_gens)
                                 - sum(cid[d] for d in bus_loads)
-                                + sum(cid_pv[p] for p in bus_PV) #*p_size[p]
+                                + sum(cid_RES[p] for p in bus_RES) #*p_size[p]
                                 - sum(gs for gs in values(bus_gs))*vi - sum(bs for bs in values(bus_bs))*vr
                                 )
 end

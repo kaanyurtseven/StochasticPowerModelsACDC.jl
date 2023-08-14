@@ -8,27 +8,28 @@
 ################################################################################
 
 ""
-function solve_sopf_acdc_iv(file::String, model_constructor, optimizer; deg::Int=1, solution_processors=[sol_data_model!], kwargs...)
+function solve_sopf_acdc(file::String, model_constructor, optimizer; deg::Int=1, p_size=0, solution_processors=[sol_data_model!], kwargs...)
     data = _PM.parse_file(file)
     process_additional_data!(data)
     
-    return solve_sopf_acdc_iv(data, model_constructor, optimizer; deg=deg,ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
+    return solve_sopf_acdc(data, model_constructor, optimizer; deg=deg, p_size=p_size, ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
 end
 
 ""
-function solve_sopf_acdc_iv(data::Dict, model_constructor, optimizer; deg::Int=1, solution_processors=[sol_data_model!], kwargs...)
+function solve_sopf_acdc(data::Dict, model_constructor, optimizer; deg::Int=1, p_size=0, solution_processors=[sol_data_model!], kwargs...)
     @assert _IM.ismultinetwork(data) == false "The data supplied is multinetwork, it should be single-network"
     @assert model_constructor <: _PM.AbstractIVRModel "This problem type only supports the IVRModel"
     
-    sdata = build_stochastic_acdc_data(data, deg)
-    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sopf_acdc_iv; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
+    sdata = build_stochastic_acdc_data(data, deg, p_size)
+    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sopf_acdc; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
     result["mop"] = sdata["mop"]
     
     return result
 end
 
+
 ""
-function build_sopf_acdc_iv(pm::AbstractPowerModel)
+function build_sopf_acdc(pm::AbstractPowerModel)
     for (n, network) in _PM.nws(pm) 
         if n == 1
             bounded = true
@@ -54,9 +55,12 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         variable_dc_converter(pm, nw=n, bounded=bounded)
         variable_dc_converter_squared(pm, nw=n, bounded=bounded)
 
+        variable_RES_current(pm, nw=n, bounded=bounded)
+
     end
     
     objective_min_expected_generation_cost(pm)
+
 
     for (n, network) in _PM.nws(pm)
         for i in _PM.ids(pm, :ref_buses, nw=n)
@@ -64,7 +68,10 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, :bus, nw=n)
-            constraint_current_balance_ac(pm, i, nw=n)
+            #constraint_current_balance_ac(pm, i, nw=n)
+
+            constraint_current_balance_with_RES(pm, i, nw=n)
+
             constraint_gp_bus_voltage_magnitude_squared(pm, i, nw=n)
         end
 
@@ -92,7 +99,7 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             constraint_ohms_dc_branch(pm, i, nw=n)
         end
 
-         for i in _PM.ids(pm, :convdc, nw=n)
+        for i in _PM.ids(pm, :convdc, nw=n)
             constraint_gp_filter_voltage_squared(pm, i, nw=n)
             constraint_gp_converter_voltage_squared(pm, i, nw=n)
             constraint_gp_transformer_current_from_squared(pm, i, nw=n)
@@ -111,7 +118,12 @@ function build_sopf_acdc_iv(pm::AbstractPowerModel)
             constraint_conv_reactor(pm, i, nw=n)
             constraint_conv_filter(pm, i, nw=n)
 
-         end
+        end
+
+        for p in _PM.ids(pm, :RES, nw=n)
+            constraint_gp_RES_power(pm, p, nw=n)
+
+        end
 
     end
 

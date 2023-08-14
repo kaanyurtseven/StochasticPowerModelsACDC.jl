@@ -61,8 +61,7 @@ module StochasticPowerModelsACDC
 
     include("form/iv.jl")
 
-    include("prob/sopf_acdc_iv.jl")
-    include("prob/sopf_acdc_PV.jl")
+    include("prob/sopf_acdc.jl")
 
     include("util/data.jl")
     include("util/util.jl")
@@ -71,10 +70,10 @@ module StochasticPowerModelsACDC
     export BASE_DIR
 
     export solve_sopf_acdc_iv
-    export solve_sopf_acdc_PV
+    export solve_sopf_acdc
 
     export build_stochastic_data
-    export build_sopf_acdc_PV
+    export build_sopf_acdc
     export build_stochastic_acdc_data
     
     export extend_matlab_file_AC
