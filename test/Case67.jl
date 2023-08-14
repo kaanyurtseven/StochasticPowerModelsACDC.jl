@@ -66,12 +66,12 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
         println("Penetration Level = $pen_level")
         
         total_load = sum([data["load"]["$i"]["pd"] for i=1:length(data["load"])])
-        p_size = pen_level * total_load / length(data["load"]) #Calculate PV size for each load bus
+        p_size = pen_level * total_load / length(data["load"]) #Calculate RES size for each load bus
         p_size_dict[pen_level] = p_size
         
         if solve_case1
             println("   Case 1 solution progress: Solving...")
-            global result_spmacdc_case1 = solve_sopf_acdc_PV(file1, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
+            global result_spmacdc_case1 = solve_sopf_acdc(file1, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
             
             #Store necessary values for reporting
             obj_case1[pen_level] = result_spmacdc_case1["objective"]
