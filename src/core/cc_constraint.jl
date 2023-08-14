@@ -465,3 +465,47 @@ function constraint_cc_gen_power_imaginary(pm::AbstractACRModel, g, qmin, qmax, 
         _PM.sol(pm, 1, :gen, g)[:dual_gen_power_imarginary_max] = qg_max_cc
     end
 end
+
+function constraint_cc_dc_branch_current_on_off(pm::AbstractACRModel, i, Imax, Imin, λmax, λmin, f_idx, t_idx, T2, mop)
+    i_dc_fr_on_off = [_PM.var(pm, n, :igrid_dc_on_off, f_idx) for n in sorted_nw_ids(pm)]
+    i_dc_to_on_off = [_PM.var(pm, n, :igrid_dc_on_off, t_idx) for n in sorted_nw_ids(pm)]
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(i_dc_fr_on_off, mop) <= Imax)
+
+    JuMP.@constraint(pm.model, Imin <= _PCE.mean(i_dc_fr_on_off, mop))
+
+    # chance constraint bounds
+    i_dc_fr_max_cc = JuMP.@constraint(pm.model,  _PCE.var(i_dc_fr_on_off, T2)
+                               <=
+                                ((Imax - _PCE.mean(i_dc_fr_on_off, mop)) / λmax)^2
+                    )
+
+    
+    i_dc_fr_min_cc = JuMP.@constraint(pm.model,  _PCE.var(i_dc_fr_on_off, T2)
+                                <=
+                               ((_PCE.mean(i_dc_fr_on_off, mop) - Imin) / λmin)^2
+    )
+    
+
+    # bounds on the expectation
+    JuMP.@constraint(pm.model, _PCE.mean(i_dc_to_on_off, mop) <= Imax)
+    JuMP.@constraint(pm.model, Imin <= _PCE.mean(i_dc_to_on_off, mop))
+
+    # chance constraint bounds
+    i_dc_to_max_cc = JuMP.@constraint(pm.model,  _PCE.var(i_dc_to_on_off, T2)
+                               <=
+                                ((Imax - _PCE.mean(i_dc_to_on_off, mop)) / λmax)^2
+                    )
+    
+    i_dc_to_min_cc = JuMP.@constraint(pm.model,  _PCE.var(i_dc_to_on_off, T2)
+                                <=
+                               ((_PCE.mean(i_dc_to_on_off, mop) - Imin) / λmin)^2
+    )
+    if _IM.report_duals(pm)
+        _PM.sol(pm, 1, :branchdc, i)[:dual_dc_brach_current_from_min] = i_dc_fr_min_cc
+        _PM.sol(pm, 1, :branchdc, i)[:dual_dc_brach_current_from_max] = i_dc_fr_max_cc
+        _PM.sol(pm, 1, :branchdc, i)[:dual_dc_brach_current_to_min] = i_dc_to_min_cc
+        _PM.sol(pm, 1, :branchdc, i)[:dual_dc_brach_current_to_max] = i_dc_to_max_cc
+    end
+end

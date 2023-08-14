@@ -137,3 +137,9 @@ function constraint_current_balance_with_RES(pm::AbstractPowerModel, i::Int; nw:
 
 end
 
+function constraint_current_balance_dc_on_off(pm::_PM.AbstractIVRModel, i::Int; nw::Int=_PM.nw_id_default)
+    bus_arcs_dcgrid = _PM.ref(pm, nw, :bus_arcs_dcgrid, i)
+    bus_convs_dc = _PM.ref(pm, nw, :bus_convs_dc, i)
+    pd = _PM.ref(pm, nw, :busdc, i)["Pdc"]
+    constraint_current_balance_dc_on_off(pm, nw, bus_arcs_dcgrid, bus_convs_dc, pd)
+end

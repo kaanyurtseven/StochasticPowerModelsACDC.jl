@@ -263,3 +263,24 @@ function constraint_cc_gen_power(pm::AbstractPowerModel, g::Int; nw::Int=nw_id_d
     constraint_cc_gen_power_imaginary(pm, g, qmin, qmax, λqmin, λqmax, T2, mop)
 end
 
+function constraint_cc_dc_branch_current_on_off(pm::AbstractPowerModel, i::Int; nw::Int=nw_id_default)
+    
+    vpu = 1;
+    branch = _PM.ref(pm, nw, :branchdc, i)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    f_idx = (i, f_bus, t_bus)
+    t_idx = (i, t_bus, f_bus)
+    
+    Imax = branch["rateA"]/vpu
+    Imin = - branch["rateA"]/vpu
+   
+       
+    λmax = _PM.ref(pm, nw, :branchdc, i, "λcmax")
+    λmin = _PM.ref(pm, nw, :branchdc, i, "λcmax")
+    
+    T2  = pm.data["T2"]
+    mop = pm.data["mop"]
+
+    constraint_cc_dc_branch_current_on_off(pm, i, Imax, Imin, λmax, λmin, f_idx, t_idx, T2, mop)
+end

@@ -214,3 +214,47 @@ function constraint_gp_RES_power(pm::AbstractPowerModel, p::Int; nw::Int=nw_id_d
     constraint_gp_RES_power_real(pm, nw, i, p, pd, T2, T3, p_size)
     constraint_gp_RES_power_imaginary(pm, nw, i, p, qd, T2, T3, q_size)
 end
+
+function constraint_gp_branch_series_current_on_off(pm::AbstractPowerModel, b::Int; nw::Int=nw_id_default)
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+
+    constraint_gp_branch_series_current_on_off(pm, nw, b, T2, T3)
+end
+
+function constraint_gp_branch_series_current_magnitude_squared_on_off(pm::AbstractPowerModel, b::Int; nw::Int=nw_id_default)
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+
+    constraint_gp_branch_series_current_magnitude_squared_on_off(pm, nw, b, T2, T3)
+end
+
+function constraint_gp_ohms_dc_branch_on_off_part1(pm::AbstractPowerModel, b::Int; nw::Int=nw_id_default)
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+
+    branch = _PM.ref(pm, nw, :branchdc, b)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    f_idx = (b, f_bus, t_bus)
+    t_idx = (b, t_bus, f_bus)
+
+    p = _PM.ref(pm, nw, :dcpol)
+
+    constraint_gp_ohms_dc_branch_on_off_part1(pm, nw, b, T2, T3, f_bus, t_bus, f_idx, t_idx, branch["r"], p)
+end
+
+function constraint_gp_ohms_dc_branch_on_off_part2(pm::AbstractPowerModel, b::Int; nw::Int=nw_id_default)
+    T2  = pm.data["T2"]
+    T3  = pm.data["T3"]
+
+    branch = _PM.ref(pm, nw, :branchdc, b)
+    f_bus = branch["fbusdc"]
+    t_bus = branch["tbusdc"]
+    f_idx = (b, f_bus, t_bus)
+    t_idx = (b, t_bus, f_bus)
+
+    p = _PM.ref(pm, nw, :dcpol)
+
+    constraint_gp_ohms_dc_branch_on_off_part2(pm, nw, b, T2, T3, f_bus, t_bus, f_idx, t_idx, branch["r"], p)
+end

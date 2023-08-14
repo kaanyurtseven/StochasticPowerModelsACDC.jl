@@ -367,3 +367,138 @@ function constraint_gp_load_power_imaginary(pm::AbstractIVRModel, n::Int, i, l, 
                                     for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
                     )
 end
+
+function constraint_gp_branch_series_current_on_off(pm::AbstractIVRModel, n::Int, i, T2, T3)
+
+    csr_on_off  = _PM.var(pm, n, :csr_on_off, i)
+    csi_on_off  = _PM.var(pm, n, :csi_on_off, i)
+
+    csr  = _PM.var(pm, n, :csr, i)
+    csi = _PM.var(pm, n, :csi, i)
+    z_branch  = _PM.var(pm, n, :z_branch, i)
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * csr_on_off
+                                ==
+                                T2.get([n-1,n-1]) * csr * z_branch[1]
+                    )
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * csi_on_off
+                                ==
+                                T2.get([n-1,n-1]) * csi * z_branch[1]
+                    )
+
+end
+
+function constraint_gp_branch_series_current_magnitude_squared_on_off(pm::AbstractIVRModel, n::Int, i, T2, T3)
+    cmss  = _PM.var(pm, n, :cmss, i)
+    
+    csr_on_off = Dict(nw => _PM.var(pm, nw, :csr_on_off, i) for nw in _PM.nw_ids(pm))
+    csi_on_off = Dict(nw => _PM.var(pm, nw, :csi_on_off, i) for nw in _PM.nw_ids(pm))
+
+
+    JuMP.@constraint(pm.model,  T2.get([n-1,n-1]) * cmss
+                                ==
+                                sum(T3.get([n1-1,n2-1,n-1]) * 
+                                    (csr_on_off[n1] * csr_on_off[n2] + csi_on_off[n1] * csi_on_off[n2])  
+                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+
+
+end
+
+function constraint_gp_ac_branch_indicator(pm::AbstractIVRModel, i::Int; nw::Int=nw_id_default)
+    err = 1e-7
+
+    z_branch = _PM.var(pm, nw, :z_branch, i)
+
+    JuMP.@constraint(pm.model, z_branch[1] * (1 - z_branch[1]) <= err)
+
+end
+
+function constraint_gp_ohms_dc_branch_on_off_part1(pm::AbstractACRModel, n::Int, b, T2, T3, f_bus, t_bus, f_idx, t_idx, r, p)
+
+    p_fr  = _PM.var(pm, n,  :p_dcgrid, f_idx)
+    p_to  = _PM.var(pm, n,  :p_dcgrid, t_idx)
+
+    p_fr_on_off  = _PM.var(pm, n,  :p_dcgrid_on_off, f_idx)
+    p_to_on_off  = _PM.var(pm, n,  :p_dcgrid_on_off, t_idx)
+
+    i_dc_fr = _PM.var(pm, n,  :igrid_dc, f_idx)
+    i_dc_to = _PM.var(pm, n,  :igrid_dc, t_idx)
+
+    z_branch_dc  = _PM.var(pm, n, :z_branch_dc, b)
+
+    vmdc_fr = Dict(nw => _PM.var(pm, nw, :vdcm, f_bus) for nw in _PM.nw_ids(pm))
+    vmdc_to = Dict(nw => _PM.var(pm, nw, :vdcm, t_bus) for nw in _PM.nw_ids(pm))
+
+
+    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * p_fr ==  
+                                                    sum(T3.get([n1-1,n2-1,n-1]) * 
+                                                    (vmdc_fr[n1] * i_dc_fr[n2]) 
+                                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+
+
+    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * p_to  ==  
+                                                    sum(T3.get([n1-1,n2-1,n-1]) *
+                                                    (vmdc_to[n1] * i_dc_to[n2])
+                                                    for n1 in _PM.nw_ids(pm), n2 in _PM.nw_ids(pm))
+                    )
+
+    
+    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * p_fr_on_off ==  
+                                                    T2.get([n-1,n-1]) * p_fr * z_branch_dc[1]
+                    )
+
+    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * p_to_on_off ==  
+                                                    T2.get([n-1,n-1]) * p_to * z_branch_dc[1]
+                    )
+
+
+    vmdc_fr = _PM.var(pm, n,  :vdcm, f_bus)
+    vmdc_to = _PM.var(pm, n,  :vdcm, t_bus)
+
+
+    if r == 0
+        JuMP.@constraint(pm.model, (i_dc_fr + i_dc_to) == 0)
+    else
+        JuMP.@constraint(pm.model, 0 <= vmdc_to - (vmdc_fr - (1/p * r * i_dc_fr)) + (1-z_branch_dc[1])*(1e-8))
+        JuMP.@constraint(pm.model, 0 >= vmdc_to - (vmdc_fr - (1/p * r * i_dc_fr)) + (1-z_branch_dc[1])*(0))
+        JuMP.@constraint(pm.model, 0 <= vmdc_fr - (vmdc_to - (1/p * r * i_dc_to)) + (1-z_branch_dc[1])*(1e-8))
+        JuMP.@constraint(pm.model, 0 >= vmdc_fr - (vmdc_to - (1/p * r * i_dc_to)) + (1-z_branch_dc[1])*(0))
+    end
+
+
+end
+
+
+function constraint_gp_ohms_dc_branch_on_off_part2(pm::AbstractACRModel, n::Int, b, T2, T3, f_bus, t_bus, f_idx, t_idx, r, p)
+
+    i_dc_fr = _PM.var(pm, n,  :igrid_dc, f_idx)
+    i_dc_to = _PM.var(pm, n,  :igrid_dc, t_idx)
+    i_dc_fr_on_off = _PM.var(pm, n,  :igrid_dc_on_off, f_idx)
+    i_dc_to_on_off = _PM.var(pm, n,  :igrid_dc_on_off, t_idx)
+
+    z_branch_dc  = _PM.var(pm, n, :z_branch_dc, b)
+
+
+    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * i_dc_fr_on_off ==  
+                                                        T2.get([n-1,n-1]) * i_dc_fr * z_branch_dc[1]
+                    )
+
+    JuMP.@constraint(pm.model, T2.get([n-1,n-1]) * i_dc_to_on_off ==  
+                                                        T2.get([n-1,n-1]) * i_dc_to * z_branch_dc[1]
+                    )
+
+end
+
+function constraint_gp_dc_branch_indicator(pm::AbstractIVRModel, i::Int; nw::Int=nw_id_default)
+    err = 1e-7
+
+    z_branch_dc = _PM.var(pm, nw, :z_branch_dc, i)
+
+    JuMP.@constraint(pm.model, z_branch_dc[1] * (1 - z_branch_dc[1]) <= err)
+
+    # JuMP.fix(z_branch_dc[1], 1; force=true)
+
+end
