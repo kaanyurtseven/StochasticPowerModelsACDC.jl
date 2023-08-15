@@ -10,21 +10,21 @@
 #This is the code for stochastic switching
 
 ""
-function solve_sots_acdc(file::String, model_constructor, optimizer; deg::Int=1, p_size=0, solution_processors=[sol_data_model!], kwargs...)
+function solve_sots_acdc_AC(file::String, model_constructor, optimizer; deg::Int=1, p_size=0, solution_processors=[sol_data_model!], kwargs...)
     
     data = _PM.parse_file(file)
     process_additional_data!(data)
     
-    return solve_sots_acdc(data, model_constructor, optimizer; deg=deg, p_size=p_size, ref_extensions = [_PMACDC.add_ref_dcgrid!, _SPMACDC.add_ref_RES!], solution_processors=solution_processors, kwargs...)
+    return solve_sots_acdc_AC(data, model_constructor, optimizer; deg=deg, p_size=p_size, ref_extensions = [_PMACDC.add_ref_dcgrid!, _SPMACDC.add_ref_RES!], solution_processors=solution_processors, kwargs...)
 end
 
 ""
-function solve_sots_acdc(data::Dict, model_constructor, optimizer; deg::Int=1, p_size=0, solution_processors=[sol_data_model!], kwargs...)
+function solve_sots_acdc_AC(data::Dict, model_constructor, optimizer; deg::Int=1, p_size=0, solution_processors=[sol_data_model!], kwargs...)
     @assert _IM.ismultinetwork(data) == false "The data supplied is multinetwork, it should be single-network"
     @assert model_constructor <: _PM.AbstractIVRModel "This problem type only supports the IVRModel"
     
     sdata = build_stochastic_data_ACDC_RES(data, deg, p_size)
-    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sots_acdc; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!, _SPMACDC.add_ref_RES!], solution_processors=solution_processors, kwargs...)
+    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sots_acdc_AC; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!, _SPMACDC.add_ref_RES!], solution_processors=solution_processors, kwargs...)
     result["mop"] = sdata["mop"]
     
     return result
@@ -32,7 +32,7 @@ end
 
 
 ""
-function build_sots_acdc(pm::AbstractPowerModel)
+function build_sots_acdc_AC(pm::AbstractPowerModel)
     for (n, network) in _PM.nws(pm) 
         if n == 1
             bounded = true
@@ -46,7 +46,6 @@ function build_sots_acdc(pm::AbstractPowerModel)
         
         #OTS variable
         variable_ac_branch_indicator(pm, nw=n)
-        variable_dc_branch_indicator(pm, nw=n)
         
         variable_branch_current_on_off_part1(pm, nw=n, bounded=false) 
 
@@ -56,7 +55,6 @@ function build_sots_acdc(pm::AbstractPowerModel)
 
         #DC grid variables
         variable_active_dcbranch_flow(pm, nw=n, bounded=bounded)
-        # variable_active_dcbranch_flow_on_off(pm, nw=n, bounded=bounded)
         variable_dcbranch_current(pm, nw=n, bounded=bounded)
         variable_dcbranch_current_on_off(pm, nw=n, bounded=bounded)
         variable_dcgrid_voltage_magnitude(pm, nw=n, bounded=bounded)
@@ -112,14 +110,13 @@ function build_sots_acdc(pm::AbstractPowerModel)
 
         #DC Constraints        
         for i in _PM.ids(pm, :busdc, nw=n)
-            constraint_current_balance_dc_on_off(pm, i, nw=n)
+            constraint_current_balance_dc(pm, i, nw=n)
         end
 
         for i in _PM.ids(pm, :branchdc, nw=n)
-            constraint_gp_ohms_dc_branch_on_off_part1(pm, i, nw=n) 
-            constraint_gp_ohms_dc_branch_on_off_part2(pm, i, nw=n)
+            constraint_gp_ohms_dc_branch(pm, i, nw=n)
 
-            constraint_gp_dc_branch_indicator(pm, i, nw=n)
+            constraint_ohms_dc_branch(pm, i, nw=n)
 
         end
         

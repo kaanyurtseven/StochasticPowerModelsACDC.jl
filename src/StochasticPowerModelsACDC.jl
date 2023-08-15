@@ -46,6 +46,7 @@ module StochasticPowerModelsACDC
     const BASE_DIR = dirname(@__DIR__)
 
     # include
+    include("core/base.jl")
     include("core/constraint.jl")
     include("core/gp_constraint.jl")
     include("core/cc_constraint.jl")
@@ -63,6 +64,7 @@ module StochasticPowerModelsACDC
 
     include("prob/sopf_acdc.jl")
     include("prob/sots_acdc.jl")
+    include("prob/sots_acdc_AC.jl")
 
     include("util/data.jl")
     include("util/util.jl")

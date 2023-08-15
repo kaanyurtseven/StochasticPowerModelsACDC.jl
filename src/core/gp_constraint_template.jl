@@ -196,7 +196,7 @@ function constraint_gp_load_power(pm::AbstractPowerModel, l::Int; nw::Int=nw_id_
 end
 
 function constraint_gp_RES_power(pm::AbstractPowerModel, p::Int; nw::Int=nw_id_default)
-    i   = _PM.ref(pm, nw, :RES, p, "load_bus") 
+    i   = _PM.ref(pm, nw, :RES, p, "RES_bus") 
 
     pd  = _PM.ref(pm, nw, :RES, p, "pd")
     qd  = _PM.ref(pm, nw, :RES, p, "qd")

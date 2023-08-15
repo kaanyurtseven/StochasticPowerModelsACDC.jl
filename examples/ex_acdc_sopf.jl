@@ -45,15 +45,15 @@ p_size_dict = Dict()
 global feas_ctr1 = 0
 global feas_ctr2 = 0
 
-global solve_case1 = false 
+global solve_case1 = true 
 global solve_case2 = true
 
 #Case file and data reading
-case1 = "case67_AC_SPMACDC_95cc.m"
+case1 = "case5_ACDC_mod_SPMACDC_95cc_RES.m"
 file1  = joinpath(BASE_DIR, "test/data/matpower", case1)
 
 # case2 = "case67_ACDC_SPMACDC_95cc.m"
-case2 = "case5_ACDC_mod_SPMACDC_95cc.m"
+case2 = "case5_ACDC_mod_SPMACDC_95cc_RES.m"
 file2  = joinpath(BASE_DIR, "test/data/matpower", case2)
 
 set = Dict("output" => Dict("duals" => false, "branch_flows" => true), "conv_losses_mp" => true)
@@ -66,7 +66,7 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
         println("Penetration Level = $pen_level")
         
         total_load = sum([data["load"]["$i"]["pd"] for i=1:length(data["load"])])
-        p_size = pen_level * total_load / length(data["load"]) #Calculate RES size for each load bus
+        p_size = pen_level * total_load / length(data["RES"]) #Calculate RES size for each load bus
         p_size_dict[pen_level] = p_size
         
         if solve_case1
@@ -120,16 +120,16 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
 end
 
 
-#Show results on the terminal
-# println("\n\n>>> SPMACDC Results - Case 1 >>>")
-# println(result_spmacdc_case1["primal_status"])
-# print("Objective: ")
-# print(result_spmacdc_case1["objective"])
+# Show results on the terminal
+println("\n\n>>> SPMACDC Results - Case 1 >>>")
+println(result_spmacdc_case1["primal_status"])
+print("Objective: ")
+print(result_spmacdc_case1["objective"])
 
-# println("\n\n>>> SPMACDC Results - Case 2 >>>")
-# println(result_spmacdc_case2["primal_status"])
-# print("Objective: ")
-# print(result_spmacdc_case2["objective"])
+println("\n\n>>> SPMACDC Results - Case 2 >>>")
+println(result_spmacdc_case2["primal_status"])
+print("Objective: ")
+print(result_spmacdc_case2["objective"])
 
 # Reporting
 if Report

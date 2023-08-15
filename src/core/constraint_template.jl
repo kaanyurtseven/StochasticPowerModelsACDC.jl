@@ -128,7 +128,8 @@ function constraint_current_balance_with_RES(pm::AbstractPowerModel, i::Int; nw:
     bus_loads = _PM.ref(pm, nw, :bus_loads, i)
     bus_shunts = _PM.ref(pm, nw, :bus_shunts, i)
 
-    bus_RES = _PM.ref(pm, nw, :bus_loads, i) 
+    bus_RES = _PM.ref(pm, nw, :bus_RES, i) 
+
 
     bus_gs = Dict(k => _PM.ref(pm, nw, :shunt, k, "gs") for k in bus_shunts)
     bus_bs = Dict(k => _PM.ref(pm, nw, :shunt, k, "bs") for k in bus_shunts)

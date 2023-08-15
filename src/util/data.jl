@@ -888,3 +888,17 @@ function converter_bounds(pmin, pmax, loss0, loss1)
     end
     return pminf, pmaxf, pmint, pmaxt
 end
+
+
+function add_RES_bus!(ref::Dict{Symbol,Any})
+    for (nw, nw_ref) in ref[:it][pm_it_sym][:nw]
+
+        bus_RES = Dict((i, Int[]) for (i,RES) in nw_ref[:RES])
+        for (i, RES) in nw_ref[:RES]
+            push!(bus_RES[load["RES_bus"]], i)
+        end
+        nw_ref[:bus_RES] = bus_RES
+
+    end
+
+end

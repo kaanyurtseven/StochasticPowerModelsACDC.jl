@@ -204,13 +204,32 @@ end
 
 function constraint_current_balance_dc_on_off(pm::_PM.AbstractIVRModel, n::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
     
-    igrid_dc= _PM.var(pm, n, :igrid_dc)
+    igrid_dc = _PM.var(pm, n, :igrid_dc)
     iconv_dc = _PM.var(pm, n, :iconv_dc)
 
-    z_branch_dc = _PM.var(pm, n, :z_branch_dc)
+    z_branch_dc = _PM.var(pm, 1, :z_branch_dc)
 
     JuMP.@constraint(pm.model, sum(z_branch_dc[a[1][1]] * igrid_dc[a] for a in bus_arcs_dcgrid) + sum(iconv_dc[c] for c in bus_convs_dc) == 0) # deal with pd
+
 
 end
 
 
+function constraint_ohms_dc_branch(pm::AbstractACRModel, n::Int, i, f_bus, t_bus, f_idx, t_idx, r, p)
+
+    vmdc_fr = _PM.var(pm, n,  :vdcm, f_bus)
+    vmdc_to = _PM.var(pm, n,  :vdcm, t_bus)
+    i_dc_fr = _PM.var(pm, n,  :igrid_dc, f_idx)
+    i_dc_to = _PM.var(pm, n,  :igrid_dc, t_idx)
+
+
+    if r == 0
+        JuMP.@constraint(pm.model, i_dc_fr + i_dc_to == 0)
+    else
+        JuMP.@constraint(pm.model, vmdc_to ==  vmdc_fr - 1/p * r * i_dc_fr)
+        JuMP.@constraint(pm.model, vmdc_fr ==  vmdc_to - 1/p * r * i_dc_to)
+    end
+
+
+
+end

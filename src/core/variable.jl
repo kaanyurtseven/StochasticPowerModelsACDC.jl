@@ -417,22 +417,22 @@ function variable_branch_series_current_imaginary_on_off(pm::AbstractPowerModel;
 end
 
 
-function variable_active_dcbranch_flow_on_off(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
-    p_on_off = _PM.var(pm, nw)[:p_dcgrid_on_off] = JuMP.@variable(pm.model,
-    [(l,i,j) in _PM.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_pdcgrid_on_off",
-    start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc, l), "p_on_off_start", 1.0)
-    )
+# function variable_active_dcbranch_flow_on_off(pm::_PM.AbstractPowerModel; nw::Int=_PM.nw_id_default, bounded::Bool = true, report::Bool=true)
+#     p_on_off = _PM.var(pm, nw)[:p_dcgrid_on_off] = JuMP.@variable(pm.model,
+#     [(l,i,j) in _PM.ref(pm, nw, :arcs_dcgrid)], base_name="$(nw)_pdcgrid_on_off",
+#     start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc, l), "p_on_off_start", 1.0)
+#     )
 
-    if bounded
-        for arc in _PM.ref(pm, nw, :arcs_dcgrid)
-            l,i,j = arc
-            JuMP.set_lower_bound(p_on_off[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"])
-            JuMP.set_upper_bound(p_on_off[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"])
-        end
-    end
+#     if bounded
+#         for arc in _PM.ref(pm, nw, :arcs_dcgrid)
+#             l,i,j = arc
+#             JuMP.set_lower_bound(p_on_off[arc], -_PM.ref(pm, nw, :branchdc, l)["rateA"])
+#             JuMP.set_upper_bound(p_on_off[arc],  _PM.ref(pm, nw, :branchdc, l)["rateA"])
+#         end
+#     end
 
-    report && _IM.sol_component_value_edge(pm, _PM.pm_it_sym, nw, :branchdc, :pf_on_off, :pt_on_off, _PM.ref(pm, nw, :arcs_dcgrid_from), _PM.ref(pm, nw, :arcs_dcgrid_to), p_on_off)
-end
+#     report && _IM.sol_component_value_edge(pm, _PM.pm_it_sym, nw, :branchdc, :pf_on_off, :pt_on_off, _PM.ref(pm, nw, :arcs_dcgrid_from), _PM.ref(pm, nw, :arcs_dcgrid_to), p_on_off)
+# end
 
 
 
@@ -478,16 +478,13 @@ function expression_variable_branch_current_real_on_off(pm::AbstractPowerModel; 
         vr_to = _PM.var(pm, nw, :vr, j)
         vi_to = _PM.var(pm, nw, :vi, j)
     
-        csr_fr_on_off = _PM.var(pm, nw, :csr_on_off, l)
-        csi_fr_on_off = _PM.var(pm, nw, :csi_on_off, l)
-
         csr_fr = _PM.var(pm, nw, :csr, l)
         csi_fr = _PM.var(pm, nw, :csi, l)
 
-        z_branch = _PM.var(pm, nw, :z_branch, l)
+        z_branch = _PM.var(pm, 1, :z_branch, l)
 
-        cr[(l,i,j)] = z_branch[1] * ((tr * csr_fr - ti * csi_fr + g_sh_fr * vr_fr - b_sh_fr * vi_fr) / tm^2)
-        cr[(l,j,i)] = z_branch[1] * (-csr_fr + g_sh_to * vr_to - b_sh_to * vi_to)
+        cr[(l,i,j)] = z_branch * ((tr * csr_fr - ti * csi_fr + g_sh_fr * vr_fr - b_sh_fr * vi_fr) / tm^2)
+        cr[(l,j,i)] = z_branch * (-csr_fr + g_sh_to * vr_to - b_sh_to * vi_to)
 
     end
 
@@ -513,14 +510,14 @@ function expression_variable_branch_current_imaginary_on_off(pm::AbstractPowerMo
     
         vr_to = _PM.var(pm, nw, :vr, j)
         vi_to = _PM.var(pm, nw, :vi, j)
+
+        csr_fr = _PM.var(pm, nw, :csr, l)
+        csi_fr = _PM.var(pm, nw, :csi, l)
     
-        csr_fr_on_off = _PM.var(pm, nw, :csr_on_off, l)
-        csi_fr_on_off = _PM.var(pm, nw, :csi_on_off, l)
+        z_branch = _PM.var(pm, 1, :z_branch, l)
 
-        z_branch = _PM.var(pm, nw, :z_branch, l)
-
-        ci[(l,i,j)] = z_branch[1] * ((tr * csi_fr_on_off + ti * csr_fr_on_off + g_sh_fr * vi_fr + b_sh_fr * vr_fr) / tm^2)
-        ci[(l,j,i)] = z_branch[1] * (-csi_fr_on_off + g_sh_to * vi_to + b_sh_to * vr_to)
+        ci[(l,i,j)] = z_branch * ((tr * csi_fr + ti * csr_fr + g_sh_fr * vi_fr + b_sh_fr * vr_fr) / tm^2)
+        ci[(l,j,i)] = z_branch * (-csi_fr + g_sh_to * vi_to + b_sh_to * vr_to)
 
     end
 

@@ -27,16 +27,16 @@ Memento.setlevel!(Memento.getlogger(PowerModels), "error")
 Memento.setlevel!(Memento.getlogger(PolyChaos), "error")
 
 #Solver inputs
-ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_cpu_time" => 18000.0, "max_iter"=>10000, "sb"=>"yes", "fixed_variable_treatment" => "relax_bounds")
+ipopt_solver = JuMP.optimizer_with_attributes(Ipopt.Optimizer, "print_level"=>0, "max_cpu_time" => 300.0, "max_iter"=>3000, "sb"=>"yes")
 
 
 #gPC degree input
 deg  = 2
 
 #PV inputs
-pen_level_start = 0.4
+pen_level_start = 0.3
 pen_level_step = 0.01
-pen_level_end = 0.4
+pen_level_end = 0.3
 
 #Necessary initializations
 obj_AC = Dict()
@@ -59,10 +59,10 @@ global feas_ctr_AC_sots = 0
 global feas_ctr_ACDC_sots = 0
 
 solve_sopf = true
-solve_case_AC = false
+solve_case_AC = true
 solve_case_ACDC = true
 
-case = "case5_ACDC_mod_SPMACDC_95cc.m"
+case = "case5_ACDC_mod_SPMACDC_95cc_RES.m"
 
 file  = joinpath(BASE_DIR, "test/data/matpower/", case)
 
@@ -92,12 +92,50 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
 
     println("Penetration Level = $pen_level")
 
+    if solve_case_AC
+        
+        total_load = sum([data["load"]["$i"]["pd"] for i=1:length(data["load"])])
+        p_size = pen_level * total_load / length(data["RES"]) #Calculate PV size for each load bus
+        p_size_dict[pen_level] = p_size
+    
+
+        println("   AC SOTS: Solution progress: Solving...")
+        global result_sots_AC[pen_level] = _SPMACDC.solve_sots_acdc_AC(data_AC, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
+        
+       
+        #Store necessary values for reporting
+        obj_AC[pen_level] = result_sots_AC[pen_level]["objective"] 
+        stat_AC[pen_level] = string(result_sots_AC[pen_level]["primal_status"])
+        time_AC[pen_level] = string(result_sots_AC[pen_level]["solve_time"])
+
+        if string(result_sots_AC[pen_level]["primal_status"]) != "FEASIBLE_POINT" && string(result_sots_AC[pen_level]["primal_status"]) !="NEARLY_FEASIBLE_POINT"
+            global feas_ctr_AC_sots += 1
+        else
+            global feas_ctr_AC_sots = 0
+        end
+
+        println("   AC SOTS: Solution progress: Solved! (", string(result_sots_AC[pen_level]["primal_status"]), ")")
+
+        if feas_ctr_AC_sots >= 2
+            println("   Case reached infeasibility on penetration level of $pen_level.")
+            global solve_case_AC = false
+        end
+
+        # global sots_AC_vm_2 = sample(result_sots_AC[pen_level], "bus", 2, "vm"; sample_size=10000);
+        # global sots_AC_vm_3 = sample(result_sots_AC[pen_level], "bus", 3, "vm"; sample_size=10000);
+        # global sots_AC_vm_4 = sample(result_sots_AC[pen_level], "bus", 4, "vm"; sample_size=10000);
+        # global sots_AC_vm_5 = sample(result_sots_AC[pen_level], "bus", 5, "vm"; sample_size=10000);
+        # global sots_AC_pg_10 = sample(result_sots_AC[pen_level], "gen", 10, "pg"; sample_size=10000);
+        # global sots_AC_csr_8 = sample(result_sots_AC[pen_level], "branch", 8, "csr_fr_on_off"; sample_size=10000);
+
+    end
+
     if solve_case_ACDC
          
         println("   AC/DC SOTS: Solution progress: Solving...")
 
         total_load = sum([data["load"]["$i"]["pd"] for i=1:length(data["load"])])
-        p_size = pen_level * total_load / length(data["load"]) #Calculate PV size for each load bus
+        p_size = pen_level * total_load / length(data["RES"]) #Calculate PV size for each load bus
         p_size_dict[pen_level] = p_size
 
         global result_sots_ACDC[pen_level] = _SPMACDC.solve_sots_acdc(data_ACDC, _PM.IVRPowerModel, ipopt_solver, deg=deg, p_size=p_size);
@@ -140,7 +178,7 @@ for pen_level = pen_level_start:pen_level_step:pen_level_end
     if solve_sopf
         
         total_load = sum([data["load"]["$i"]["pd"] for i=1:length(data["load"])])
-        p_size = pen_level * total_load / length(data["load"]) #Calculate PV size for each load bus
+        p_size = pen_level * total_load / length(data["RES"]) #Calculate PV size for each load bus
         p_size_dict[pen_level] = p_size
     
     
@@ -175,17 +213,8 @@ end
 #Show results on the terminal
 pen_level = pen_level_start
 
-if solve_sopf || solve_case_ACDC
+if solve_sopf || solve_case_AC || solve_case_ACDC
     println("\n\n>>> Penetration Level: $(pen_level*100)% >>>")
-end
-
-if solve_case_ACDC
-    println("\n\n>>> Results - ACDC SOTS >>>")
-    println(result_sots_ACDC[pen_level]["primal_status"])
-    print("Objective: ")
-    print(result_sots_ACDC[pen_level]["objective"])
-    print("\nSolve Time: ")
-    print(result_sots_ACDC[pen_level]["solve_time"])
 end
 
 if solve_sopf
@@ -195,4 +224,22 @@ if solve_sopf
     print(result_sopf[pen_level]["objective"])
     print("\nSolve Time: ")
     print(result_sopf[pen_level]["solve_time"])
+end
+
+if solve_case_AC
+    println("\n\n>>> Results - AC SOTS >>>")
+    println(result_sots_AC[pen_level]["primal_status"])
+    print("Objective: ")
+    print(result_sots_AC[pen_level]["objective"])
+    print("\nSolve Time: ")
+    print(result_sots_AC[pen_level]["solve_time"])
+end
+
+if solve_case_ACDC
+    println("\n\n>>> Results - ACDC SOTS >>>")
+    println(result_sots_ACDC[pen_level]["primal_status"])
+    print("Objective: ")
+    print(result_sots_ACDC[pen_level]["objective"])
+    print("\nSolve Time: ")
+    print(result_sots_ACDC[pen_level]["solve_time"])
 end

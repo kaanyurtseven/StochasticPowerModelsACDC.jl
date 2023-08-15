@@ -12,7 +12,7 @@ function solve_sopf_acdc(file::String, model_constructor, optimizer; deg::Int=1,
     data = _PM.parse_file(file)
     process_additional_data!(data)
     
-    return solve_sopf_acdc(data, model_constructor, optimizer; deg=deg, p_size=p_size, ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
+    return solve_sopf_acdc(data, model_constructor, optimizer; deg=deg, p_size=p_size, ref_extensions = [_PMACDC.add_ref_dcgrid!, _SPMACDC.add_ref_RES!], solution_processors=solution_processors, kwargs...)
 end
 
 ""
@@ -20,8 +20,8 @@ function solve_sopf_acdc(data::Dict, model_constructor, optimizer; deg::Int=1, p
     @assert _IM.ismultinetwork(data) == false "The data supplied is multinetwork, it should be single-network"
     @assert model_constructor <: _PM.AbstractIVRModel "This problem type only supports the IVRModel"
     
-    sdata = build_stochastic_acdc_data(data, deg, p_size)
-    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sopf_acdc; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!], solution_processors=solution_processors, kwargs...)
+    sdata = build_stochastic_data_ACDC_RES(data, deg, p_size)
+    result = _PM.solve_model(sdata, model_constructor, optimizer, build_sopf_acdc; multinetwork=true, ref_extensions = [_PMACDC.add_ref_dcgrid!, _SPMACDC.add_ref_RES!], solution_processors=solution_processors, kwargs...)
     result["mop"] = sdata["mop"]
     
     return result
