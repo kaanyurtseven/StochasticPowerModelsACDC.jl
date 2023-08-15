@@ -1,6 +1,6 @@
 # StochasticPowerModelsACDC.jl
 
-StochasticPowerModelsACDC.jl is a Julia/JuMP/PowerModels package which contains an open-source code for a mathematical chance-constrained framework for solving the stochastic optimal power flow problem for AC/DC grids. This framework takes into account HVDC controllability and uncertainties brought about by load and renewable energy generation, by using an intrusive general polynomial chaos approach.
+StochasticPowerModelsACDC.jl is a Julia/JuMP/PowerModels package which contains an open-source code for a mathematical chance-constrained framework for solving the stochastic optimal power flow and stochastic optimal transmission switching problems for AC/DC grids. This framework takes into account HVDC controllability and uncertainties brought about by load and renewable energy generation, by using an intrusive general polynomial chaos approach.
 
 ## Getting Started
 
@@ -15,9 +15,10 @@ The latest stable release of PowerModelACDC can be installed using the Julia pac
 ```
 ### Core Problem Specification
 * Stochastic Optimal Power Flow for AC and AC/DC grids
+* Stochastic Optimal Transmission Switching for AC and AC/DC grids
 
 ### Core Network Formulation
-The code currently supports only the IVR-formulated optimal power flow problem.
+The code currently supports only the IVR-formulated optimal power flow and optimal transmission switching problem.
 
 ## Contributing
 
