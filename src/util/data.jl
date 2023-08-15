@@ -5,7 +5,13 @@ function extend_matlab_file_AC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
+    α = 0.95; 
+
+    λ_val = Distributions.quantile.(Distributions.Normal(), [1-α, α]);
+
+    λ_val = round(λ_val[2], digits = 3);
+
+    # λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
 
     # general data
     baseMVA = data["baseMVA"]
@@ -141,14 +147,20 @@ function extend_matlab_file_AC(path::String)
     end
 
     # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC_95cc_single_full.m", data)
+    _PM.export_file(path[1:end-2] * "_SPMACDC_$(round(Int,(100*α)))" * "cc_alpha.m", data)
 end
 
 function extend_matlab_file_ACDC(path::String)
     # data
     data = _PM.parse_file(path)
 
-    λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
+    α = 0.85; 
+
+    λ_val = Distributions.quantile.(Distributions.Normal(), [1-α, α])
+
+    λ_val = round(λ_val[2], digits = 3);
+
+    # λ_val = 1.65; #0.95 = 1.65, 0.90 = 1.285, 0.85 = 1.03643, 0.80 = 0.83
 
     # general data
     baseMVA = data["baseMVA"]
@@ -182,33 +194,33 @@ function extend_matlab_file_ACDC(path::String)
     #     end
     # end
     
-    # for (b,bus) in data["bus"]
+    for (b,bus) in data["bus"]
 
-    #     if parse(Int,b) == 3
+        if parse(Int,b) == 3
             
-    #         bus["dst_id"]   = 1
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
+            bus["dst_id"]   = 1
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
         
-    #     elseif parse(Int,b) == 4
+        elseif parse(Int,b) == 4
             
-    #         bus["dst_id"]   = 2
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
+            bus["dst_id"]   = 2
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
         
-    #     else
-    #         bus["dst_id"]   = 0
-    #         bus["μ"]        = μ[parse(Int,b)]
-    #         bus["σ"]        = σ[parse(Int,b)]
-    #         bus["λvmin"]    = λ_val
-    #         bus["λvmax"]    = λ_val
-    #     end
+        else
+            bus["dst_id"]   = 0
+            bus["μ"]        = μ[parse(Int,b)]
+            bus["σ"]        = σ[parse(Int,b)]
+            bus["λvmin"]    = λ_val
+            bus["λvmax"]    = λ_val
+        end
 
-    # end
+    end
 
     # for (b,bus) in data["bus"]
 
@@ -238,25 +250,25 @@ function extend_matlab_file_ACDC(path::String)
 
     # end
 
-    for (b,bus) in data["bus"]
+    # for (b,bus) in data["bus"]
 
-        if parse(Int,b) in 1:67
+    #     if parse(Int,b) in 1:67
             
-            bus["dst_id"]   = 1
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
+    #         bus["dst_id"]   = 1
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
         
-        else
-            bus["dst_id"]   = 0
-            bus["μ"]        = μ[parse(Int,b)]
-            bus["σ"]        = σ[parse(Int,b)]
-            bus["λvmin"]    = λ_val
-            bus["λvmax"]    = λ_val
-        end
+    #     else
+    #         bus["dst_id"]   = 0
+    #         bus["μ"]        = μ[parse(Int,b)]
+    #         bus["σ"]        = σ[parse(Int,b)]
+    #         bus["λvmin"]    = λ_val
+    #         bus["λvmax"]    = λ_val
+    #     end
 
-    end
+    # end
         
     # for (b,bus) in data["bus"]
 
@@ -301,7 +313,7 @@ function extend_matlab_file_ACDC(path::String)
     end
 
     # export file
-    _PM.export_file(path[1:end-2] * "_SPMACDC_95cc_single_full.m", data)
+    _PM.export_file(path[1:end-2] * "_SPMACDC_$(round(Int,(100*α)))" * "cc_alpha.m", data)
 end
 
 function get_pu_bases(MVAbase, kVbase)
